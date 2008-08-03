@@ -162,7 +162,7 @@ const char * SP_JsonDomParser :: getError() const
 	return mParser->getError();
 }
 
-const SP_JsonNode * SP_JsonDomParser :: getValue() const
+SP_JsonNode * SP_JsonDomParser :: getValue() const
 {
 	return mContainer->getValue( 0 );
 }
