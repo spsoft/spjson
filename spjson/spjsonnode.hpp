@@ -31,7 +31,7 @@ public:
 	SP_JsonStringNode( const char * value );
 	virtual ~SP_JsonStringNode();
 
-	const char * getValue();
+	const char * getValue() const;
 
 private:
 	char * mValue;
@@ -42,7 +42,7 @@ public:
 	SP_JsonDoubleNode( double value );
 	virtual ~SP_JsonDoubleNode();
 
-	double getValue();
+	double getValue() const;
 
 private:
 	double mValue;
@@ -53,7 +53,7 @@ public:
 	SP_JsonIntNode( int value );
 	virtual ~SP_JsonIntNode();
 
-	int getValue();
+	int getValue() const;
 
 private:
 	int mValue;
@@ -70,7 +70,7 @@ public:
 	SP_JsonBooleanNode( bool value );
 	virtual ~SP_JsonBooleanNode();
 
-	bool getValue();
+	bool getValue() const;
 
 private:
 	bool mValue;
@@ -81,7 +81,7 @@ public:
 	SP_JsonCommentNode( const char * comment );
 	virtual ~SP_JsonCommentNode();
 
-	const char * getValue();
+	const char * getValue() const;
 
 private:
 	char * mValue;
@@ -93,10 +93,10 @@ public:
 	virtual ~SP_JsonPairNode();
 
 	void setName( const char * name );
-	const char * getName();
+	const char * getName() const;
 
 	void setValue( SP_JsonNode * value );
-	SP_JsonNode * getValue();
+	SP_JsonNode * getValue() const;
 
 private:
 	char * mName;
@@ -108,13 +108,13 @@ public:
 	SP_JsonObjectNode();
 	virtual ~SP_JsonObjectNode();
 
-	int getCount();
+	int getCount() const;
 
 	int addValue( SP_JsonPairNode * value );
-	SP_JsonPairNode * getValue( int index );
+	SP_JsonPairNode * getValue( int index ) const;
 	SP_JsonPairNode * takeValue( int index );
 
-	int Find( const char * name );
+	int find( const char * name ) const;
 
 	int isLastChild( const SP_JsonNode * value ) const;
 
@@ -127,10 +127,10 @@ public:
 	SP_JsonArrayNode();
 	virtual ~SP_JsonArrayNode();
 
-	int getCount();
+	int getCount() const;
 
 	int addValue( SP_JsonNode * value );
-	SP_JsonNode * getValue( int index );
+	SP_JsonNode * getValue( int index ) const;
 	SP_JsonNode * takeValue( int index );
 
 	int isLastChild( const SP_JsonNode * value ) const;

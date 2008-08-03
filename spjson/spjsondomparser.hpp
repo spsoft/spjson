@@ -24,7 +24,7 @@ public:
 
 	const char * getError() const;
 
-	const SP_JsonNode * getValue() const;
+	SP_JsonNode * getValue() const;
 
 private:
 

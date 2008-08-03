@@ -67,7 +67,7 @@ SP_JsonStringNode :: ~SP_JsonStringNode()
 	mValue = NULL;
 }
 
-const char * SP_JsonStringNode :: getValue()
+const char * SP_JsonStringNode :: getValue() const
 {
 	return mValue;
 }
@@ -84,7 +84,7 @@ SP_JsonDoubleNode :: ~SP_JsonDoubleNode()
 {
 }
 
-double SP_JsonDoubleNode :: getValue()
+double SP_JsonDoubleNode :: getValue() const
 {
 	return mValue;
 }
@@ -101,7 +101,7 @@ SP_JsonIntNode :: ~SP_JsonIntNode()
 {
 }
 
-int SP_JsonIntNode :: getValue()
+int SP_JsonIntNode :: getValue() const
 {
 	return mValue;
 }
@@ -129,7 +129,7 @@ SP_JsonBooleanNode :: ~SP_JsonBooleanNode()
 {
 }
 
-bool SP_JsonBooleanNode :: getValue()
+bool SP_JsonBooleanNode :: getValue() const
 {
 	return mValue;
 }
@@ -147,7 +147,7 @@ SP_JsonCommentNode :: ~SP_JsonCommentNode()
 	free( mValue );
 }
 
-const char * SP_JsonCommentNode :: getValue()
+const char * SP_JsonCommentNode :: getValue() const
 {
 	return mValue;
 }
@@ -178,7 +178,7 @@ void SP_JsonPairNode :: setName( const char * name )
 	}
 }
 
-const char * SP_JsonPairNode :: getName()
+const char * SP_JsonPairNode :: getName() const
 {
 	return mName;
 }
@@ -189,7 +189,7 @@ void SP_JsonPairNode :: setValue( SP_JsonNode * value )
 	mValue = value;
 }
 
-SP_JsonNode * SP_JsonPairNode :: getValue()
+SP_JsonNode * SP_JsonPairNode :: getValue() const
 {
 	return mValue;
 }
@@ -211,7 +211,7 @@ SP_JsonObjectNode :: ~SP_JsonObjectNode()
 	mValueList = NULL;
 }
 
-int SP_JsonObjectNode :: getCount()
+int SP_JsonObjectNode :: getCount() const
 {
 	return mValueList->getCount();
 }
@@ -225,7 +225,7 @@ int SP_JsonObjectNode :: addValue( SP_JsonPairNode * value )
 	return 0;
 }
 
-SP_JsonPairNode * SP_JsonObjectNode :: getValue( int index )
+SP_JsonPairNode * SP_JsonObjectNode :: getValue( int index ) const
 {
 	return (SP_JsonPairNode*)mValueList->getItem( index );
 }
@@ -245,7 +245,7 @@ int SP_JsonObjectNode :: isLastChild( const SP_JsonNode * value ) const
 	return NULL == value ? 0 : ( lastChild == value ? 1 : 0 );
 }
 
-int SP_JsonObjectNode :: Find( const char * name )
+int SP_JsonObjectNode :: find( const char * name ) const
 {
 	int ret = -1;
 	for( int i = 0; i < mValueList->getCount(); i++ ) {
@@ -276,7 +276,7 @@ SP_JsonArrayNode :: ~SP_JsonArrayNode()
 	mValueList = NULL;
 }
 
-int SP_JsonArrayNode :: getCount()
+int SP_JsonArrayNode :: getCount() const
 {
 	return mValueList->getCount();
 }
@@ -287,7 +287,7 @@ int SP_JsonArrayNode :: addValue( SP_JsonNode * value )
 	return mValueList->append( value );
 }
 
-SP_JsonNode * SP_JsonArrayNode :: getValue( int index )
+SP_JsonNode * SP_JsonArrayNode :: getValue( int index ) const
 {
 	return (SP_JsonNode*)mValueList->getItem( index );
 }
