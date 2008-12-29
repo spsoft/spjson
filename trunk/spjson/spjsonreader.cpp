@@ -258,7 +258,11 @@ void SP_JsonNameReader :: read( SP_JsonPullParser * parser, char c )
 		if( '"' == c && '\\' != mLastChar ) {
 			changeReader( parser, new SP_JsonSpaceReader( 1 ) );
 		} else {
-			mLastChar = c;
+			if( '\\' == mLastChar && '\\' == c ) {
+				mLastChar = '\0';
+			} else {
+				mLastChar = c;
+			}
 			mBuffer->append( c );
 		}
 	}
@@ -355,7 +359,11 @@ void SP_JsonStringReader :: read( SP_JsonPullParser * parser, char c )
 		if( '"' == c && '\\' != mLastChar ) {
 			changeReader( parser, new SP_JsonSpaceReader() );
 		} else {
-			mLastChar = c;
+			if( '\\' == mLastChar && '\\' == c ) {
+				mLastChar = '\0';
+			} else {
+				mLastChar = c;
+			}
 			mBuffer->append( c );
 		}
 	}
