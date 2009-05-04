@@ -16,6 +16,8 @@ public:
 
 	static int encode( double value, SP_JsonStringBuffer * outBuffer );
 
+	static int encode( double value, char * buffer, int len );
+
 	static const char ESCAPE_CHARS [];
 	static const char UNESCAPED_CHARS [];
 

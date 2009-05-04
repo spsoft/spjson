@@ -75,12 +75,19 @@ int SP_JsonCodec :: encode( double value, SP_JsonStringBuffer * outBuffer )
 {
 	char buffer[ 128 ] = { 0 };
 
-	if( ((double)ceil( value )) == value ) {
-		snprintf( buffer, sizeof( 128 ), "%.0f", value );
-	} else {
-		snprintf( buffer, sizeof( 128 ), "%f", value );
-	}
+	encode( value, buffer, sizeof( buffer ) );
 
 	return outBuffer->append( buffer );
+}
+
+int SP_JsonCodec :: encode( double value, char * buffer, int len )
+{
+	if( ((double)ceil( value )) == value ) {
+		snprintf( buffer, len, "%.0f", value );
+	} else {
+		snprintf( buffer, len, "%f", value );
+	}
+
+	return 0;
 }
 
