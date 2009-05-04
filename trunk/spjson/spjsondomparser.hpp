@@ -50,8 +50,9 @@ public:
 	const char * getBuffer() const;
 	int getSize() const;
 
-private:
-	SP_JsonStringBuffer * mBuffer;
+public:
+
+	static void dump( const SP_JsonNode * node, char * buffer, int len );
 
 	static void dump( const SP_JsonNode * node,
 			SP_JsonStringBuffer * buffer, int level );
@@ -59,6 +60,9 @@ private:
 			SP_JsonStringBuffer * buffer, int level );
 	static void dumpArray( const SP_JsonNode * node,
 			SP_JsonStringBuffer * buffer, int level );
+
+private:
+	SP_JsonStringBuffer * mBuffer;
 };
 
 #endif
