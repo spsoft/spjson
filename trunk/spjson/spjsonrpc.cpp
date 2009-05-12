@@ -157,11 +157,11 @@ int SP_JsonRpcUtils :: toReqBuffer( const char * method, const char * id,
 
 	SP_JsonDomBuffer::dumpArray( params, buffer, -1 );
 
-	buffer->append( ", \"id\": " );
+	buffer->append( ", \"id\": \"" );
 
 	SP_JsonCodec::encode( id, buffer );
 
-	buffer->append( " }" );
+	buffer->append( "\" }" );
 
 	return 0;
 }
@@ -182,11 +182,29 @@ int SP_JsonRpcUtils :: toRespBuffer( const SP_JsonNode * id, const SP_JsonNode *
 		}
 	}
 
-	buffer->append( "\"id\": " );
-
-	SP_JsonDomBuffer::dump( id, buffer, -1 );
+	if( NULL != id ) {
+		buffer->append( "\"id\": " );
+		SP_JsonDomBuffer::dump( id, buffer, -1 );
+	}
 
 	buffer->append( " }" );
+
+	return 0;
+}
+
+int SP_JsonRpcUtils :: setError( SP_JsonObjectNode * error, int code, const char * msg )
+{
+	SP_JsonPairNode * codePair = new SP_JsonPairNode();
+	codePair->setName( "code" );
+	codePair->setValue( new SP_JsonIntNode( code ) );
+
+	error->addValue( codePair );
+
+	SP_JsonPairNode * msgPair = new SP_JsonPairNode();
+	msgPair->setName( "message" );
+	msgPair->setValue( new SP_JsonStringNode( msg ) );
+
+	error->addValue( msgPair );
 
 	return 0;
 }

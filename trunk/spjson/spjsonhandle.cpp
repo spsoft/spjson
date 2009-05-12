@@ -9,7 +9,7 @@
 
 #include "spjsonnode.hpp"
 
-SP_JsonHandle :: SP_JsonHandle( SP_JsonNode * node )
+SP_JsonHandle :: SP_JsonHandle( const SP_JsonNode * node )
 {
 	mNode = node;
 }
@@ -60,13 +60,13 @@ SP_JsonHandle SP_JsonHandle :: getChild( int index ) const
 
 SP_JsonNode * SP_JsonHandle :: toNode() const
 {
-	return mNode;
+	return (SP_JsonNode*)mNode;
 }
 
 SP_JsonNode * SP_JsonHandle :: checkType( int type ) const
 {
 	if( NULL != mNode && mNode->getType() == type ) {
-		return mNode;
+		return (SP_JsonNode*)mNode;
 	}
 
 	return NULL;
