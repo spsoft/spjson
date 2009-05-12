@@ -71,11 +71,23 @@ private:
 
 class SP_JsonRpcUtils {
 public:
+
+	enum {
+		eParseError     = -32700,
+		eInvalidRequest = -32600,
+		eMethodNoFound  = -32601,
+		eInvalidParams  = -32602,
+		eInternalError  = -32603
+	};
+
+public:
 	static int toReqBuffer( const char * method, const char * id,
 			const SP_JsonArrayNode * params, SP_JsonStringBuffer * buffer );
 
 	static int toRespBuffer( const SP_JsonNode * id, const SP_JsonNode * result,
 			const SP_JsonObjectNode * error, SP_JsonStringBuffer * buffer );
+
+	static int setError( SP_JsonObjectNode * error, int code, const char * msg );
 
 private:
 	SP_JsonRpcUtils();

@@ -71,7 +71,7 @@ class SP_JsonCommentNode;
 
 class SP_JsonHandle {
 public:
-	SP_JsonHandle( SP_JsonNode * node );
+	SP_JsonHandle( const SP_JsonNode * node );
 
 	SP_JsonHandle( const SP_JsonHandle & ref );
 
@@ -107,7 +107,7 @@ private:
 
 	SP_JsonNode * checkType( int type ) const;
 
-	SP_JsonNode * mNode;
+	const SP_JsonNode * mNode;
 };
 
 #endif
