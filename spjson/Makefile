@@ -17,7 +17,7 @@ LIBOBJS = spjsonutils.o spjsoncodec.o spjsonevent.o spjsonreader.o \
 		spjsonparser.o spjsonnode.o spjsoniterator.o spjsondomparser.o \
 		spjsonhandle.o spjsonrpc.o
 
-TARGET =  libspjson.so \
+TARGET =  libspjson.so libspjson.a \
 		testpull testdom testhandle testrpc
 
 #--------------------------------------------------------------------
