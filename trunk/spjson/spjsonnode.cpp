@@ -91,7 +91,7 @@ double SP_JsonDoubleNode :: getValue() const
 
 //=========================================================
 
-SP_JsonIntNode :: SP_JsonIntNode( int value )
+SP_JsonIntNode :: SP_JsonIntNode( long long value )
 	: SP_JsonNode( eInt )
 {
 	mValue = value;
@@ -101,7 +101,7 @@ SP_JsonIntNode :: ~SP_JsonIntNode()
 {
 }
 
-int SP_JsonIntNode :: getValue() const
+long long SP_JsonIntNode :: getValue() const
 {
 	return mValue;
 }

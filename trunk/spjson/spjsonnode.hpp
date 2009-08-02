@@ -50,13 +50,13 @@ private:
 
 class SP_JsonIntNode : public SP_JsonNode {
 public:
-	SP_JsonIntNode( int value );
+	SP_JsonIntNode( long long value );
 	virtual ~SP_JsonIntNode();
 
-	int getValue() const;
+	long long getValue() const;
 
 private:
-	int mValue;
+	long long mValue;
 };
 
 class SP_JsonNullNode : public SP_JsonNode {

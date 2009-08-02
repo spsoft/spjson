@@ -205,7 +205,7 @@ void SP_JsonDomBuffer :: dump( const SP_JsonNode * node, char * buffer, int len 
 		} else if( SP_JsonNode::eDouble == node->getType() ) {
 			SP_JsonCodec::encode( ((SP_JsonDoubleNode*)node)->getValue(), buffer, len );
 		} else if( SP_JsonNode::eInt == node->getType() ) {
-			snprintf( buffer, len, "%d", ((SP_JsonIntNode*)node)->getValue() );
+			snprintf( buffer, len, "%lld", ((SP_JsonIntNode*)node)->getValue() );
 		} else if( SP_JsonNode::eBoolean == node->getType() ) {
 			strncpy( buffer, ((SP_JsonBooleanNode*)node)->getValue() ? "true" : "false", len - 1 );
 		} else if( SP_JsonNode::eNull == node->getType() ) {
@@ -235,7 +235,7 @@ void SP_JsonDomBuffer :: dump( const SP_JsonNode * node,
 		} else if( SP_JsonNode::eDouble == node->getType() ) {
 			SP_JsonCodec::encode( ((SP_JsonDoubleNode*)node)->getValue(), buffer );
 		} else if( SP_JsonNode::eInt == node->getType() ) {
-			snprintf( tmpBuffer, sizeof( tmpBuffer ), "%d", ((SP_JsonIntNode*)node)->getValue() );
+			snprintf( tmpBuffer, sizeof( tmpBuffer ), "%lld", ((SP_JsonIntNode*)node)->getValue() );
 			buffer->append( tmpBuffer );
 		} else if( SP_JsonNode::eBoolean == node->getType() ) {
 			buffer->append( ((SP_JsonBooleanNode*)node)->getValue() ? "true" : "false" );
