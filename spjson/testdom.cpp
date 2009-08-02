@@ -118,7 +118,7 @@ int main( int argc, char * argv[] )
 				postPrint( node );
 				break;
 			case SP_JsonNode::eInt:
-				printf( "%d", ((SP_JsonIntNode*)node)->getValue() );
+				printf( "%lld", ((SP_JsonIntNode*)node)->getValue() );
 				postPrint( node );
 				break;
 			case SP_JsonNode::eBoolean:
