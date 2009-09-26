@@ -15,10 +15,10 @@ RM = /bin/rm -f
 
 LIBOBJS = spjsonutils.o spjsoncodec.o spjsonevent.o spjsonreader.o \
 		spjsonparser.o spjsonnode.o spjsoniterator.o spjsondomparser.o \
-		spjsonhandle.o spjsonrpc.o
+		spjsonhandle.o spjsonrpc.o spprotobuf.o
 
 TARGET =  libspjson.so libspjson.a \
-		testpull testdom testhandle testrpc
+		testpull testdom testhandle testrpc testprotobuf
 
 #--------------------------------------------------------------------
 
@@ -40,6 +40,9 @@ testhandle: testhandle.o
 	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
 
 testrpc: testrpc.o
+	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
+
+testprotobuf: testprotobuf.o
 	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
 
 clean:
