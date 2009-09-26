@@ -15,12 +15,21 @@ public:
 	~SP_ProtoBufEncoder();
 
 	int addVarint( int fieldNumber, uint64_t value );
+	int addDouble( int fieldNumber, double value );
+	int addFloat( int fieldNumber, float value );
+
 	int add64Bit( int fieldNumber, uint64_t value );
 	int addBinary( int fieldNumber, const char * buffer, int len );
 	int add32Bit( int fieldNumber, uint32_t value );
 
+	int addPacked( int fieldNumber, uint16_t * array, int size );
+	int addPacked( int fieldNumber, uint32_t * array, int size );
+	int addPacked( int fieldNumber, uint64_t * array, int size );
+	int addPacked( int fieldNumber, float * array, int size );
+	int addPacked( int fieldNumber, double * array, int size );
+
 	const char * getBuffer();
-	int getLen();
+	int getSize();
 
 	void reset();
 
@@ -35,7 +44,7 @@ private:
 
 private:
 	char * mBuffer;
-	int mTotal, mLen;
+	int mTotal, mSize;
 };
 
 /**
@@ -55,15 +64,17 @@ public:
 	typedef struct tagKeyValPair {
 		int mFieldNumber;
 		int mWireType;
-		union {
-			uint64_t mVarint;
-			uint64_t m64Bit;
-			struct {
-				const char * mBuffer;
-				int mLen;
-			} mBinary;
-			uint32_t m32Bit;
-		} mValue;
+
+		uint64_t mVarint;  // wire type 0
+
+		uint64_t m64Bit;   // wire type 1
+
+		struct {
+			const char * mBuffer;
+			int mLen;
+		} mBinary;         // wire type 2
+
+		uint32_t m32Bit;   // wire type 5
 	} KeyValPair_t;
 
 public:
@@ -78,6 +89,12 @@ public:
 	void rewind();
 
 	static char * dup( const char * buffer, int len );
+
+	static int getPacked( const char * buffer, int len, uint16_t * array, int size );
+	static int getPacked( const char * buffer, int len, uint32_t * array, int size );
+	static int getPacked( const char * buffer, int len, uint64_t * array, int size );
+	static int getPacked( const char * buffer, int len, float * array, int size );
+	static int getPacked( const char * buffer, int len, double * array, int size );
 
 private:
 

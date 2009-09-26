@@ -38,15 +38,15 @@ void printAll( const char * buffer, int len )
 
 		switch( pair.mWireType ) {
 			case SP_ProtoBufDecoder::eWireVarint:
-				printf( "%lld\n",  pair.mValue.mVarint );
+				printf( "%lld\n",  pair.mVarint );
 				break;
 			case SP_ProtoBufDecoder::eWire64Bit:
-				printf( "%lld\n",  pair.mValue.mVarint );
+				printf( "%lld\n",  pair.mVarint );
 				break;
 			case SP_ProtoBufDecoder::eWireBinary:
 			{
-				const char * buf = pair.mValue.mBinary.mBuffer;
-				int len = pair.mValue.mBinary.mLen;
+				const char * buf = pair.mBinary.mBuffer;
+				int len = pair.mBinary.mLen;
 
 				int isString = 1;
 
@@ -73,7 +73,7 @@ void printAll( const char * buffer, int len )
 				break;
 			}
 			case SP_ProtoBufDecoder::eWire32Bit:
-				printf( "%d\n", pair.mValue.m32Bit );
+				printf( "%d\n", pair.m32Bit );
 				break;
 			default:
 				printf( "unknown\n" );
@@ -97,15 +97,15 @@ void testEncoder()
 		phone.addBinary( 1, "12345", 5 );
 		phone.addVarint( 2, 0 );
 
-		person.addBinary( 4, phone.getBuffer(), phone.getLen() );
+		person.addBinary( 4, phone.getBuffer(), phone.getSize() );
 
 		phone.reset();
 
 		phone.addBinary( 1, "6789", 4 );
 		phone.addVarint( 2, 1 );
-		person.addBinary( 4, phone.getBuffer(), phone.getLen() );
+		person.addBinary( 4, phone.getBuffer(), phone.getSize() );
 
-		addrbook.addBinary( 1, person.getBuffer(), person.getLen() );
+		addrbook.addBinary( 1, person.getBuffer(), person.getSize() );
 	}
 
 	{
@@ -115,34 +115,59 @@ void testEncoder()
 
 		FILE * fp = fopen( filename, "w" );
 		if( NULL != fp ) {
-			fwrite( addrbook.getBuffer(), 1, addrbook.getLen(), fp );
+			fwrite( addrbook.getBuffer(), 1, addrbook.getSize(), fp );
 			fclose( fp );
 		}
 	}
 
 	printf( "decode addrbook info ...\n\n" );
 
-	printAll( addrbook.getBuffer(), addrbook.getLen() );
+	printAll( addrbook.getBuffer(), addrbook.getSize() );
 
-	SP_ProtoBufDecoder decoder( addrbook.getBuffer(), addrbook.getLen() );
+	SP_ProtoBufDecoder decoder( addrbook.getBuffer(), addrbook.getSize() );
 
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 	assert( decoder.find( 1, &pair ) );
 
 	{
-		SP_ProtoBufDecoder person( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+		SP_ProtoBufDecoder person( pair.mBinary.mBuffer, pair.mBinary.mLen );
 		assert( person.find( 4, &pair, 1 ) );
 		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
 
-		SP_ProtoBufDecoder phone( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+		SP_ProtoBufDecoder phone( pair.mBinary.mBuffer, pair.mBinary.mLen );
 		assert( phone.find( 1, &pair ) );
 		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
 
-		char * tmp = SP_ProtoBufDecoder::dup( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+		char * tmp = SP_ProtoBufDecoder::dup( pair.mBinary.mBuffer, pair.mBinary.mLen );
 
 		assert( 0 == strcmp( tmp, "6789" ) );
 
 		free( tmp );
+	}
+}
+
+void testPacked()
+{
+	printf( "\ntest packed array\n" );
+
+	SP_ProtoBufEncoder encoder;
+	{
+		uint16_t array[] = { 3, 270, 86942 };
+		encoder.addPacked( 1, array, sizeof( array ) / sizeof( array[0] ) );
+	}
+
+	SP_ProtoBufDecoder decoder( encoder.getBuffer(), encoder.getSize() );
+
+	SP_ProtoBufDecoder::KeyValPair_t pair;
+
+	assert( decoder.find( 1, &pair ) );
+
+	uint16_t array[ 100 ] = { 0 };
+
+	int count = SP_ProtoBufDecoder::getPacked( pair.mBinary.mBuffer, pair.mBinary.mLen, array, 100 );
+
+	for( int i = 0; i < count; i++ ) {
+		printf( "#%d: %d\n", i, array[i] );
 	}
 }
 
@@ -175,6 +200,10 @@ int main( int argc, char * argv[] )
 
 	{
 		testEncoder();
+	}
+
+	{
+		testPacked();
 	}
 
 	return 0;

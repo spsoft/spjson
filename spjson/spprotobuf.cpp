@@ -13,7 +13,7 @@ SP_ProtoBufEncoder :: SP_ProtoBufEncoder( int initLen )
 {
 	mBuffer = NULL;
 	mTotal = 0;
-	mLen = 0;
+	mSize = 0;
 
 	ensureSpace( initLen );
 }
@@ -24,19 +24,19 @@ SP_ProtoBufEncoder :: ~SP_ProtoBufEncoder()
 
 	mBuffer = NULL;
 	mTotal = 0;
-	mLen = 0;
+	mSize = 0;
 }
 
 void SP_ProtoBufEncoder :: reset()
 {
-	mLen = 0;
+	mSize = 0;
 
 	if( NULL != mBuffer ) memset( mBuffer, 0, mTotal );
 }
 
 int SP_ProtoBufEncoder :: ensureSpace( int space )
 {
-	int need = mLen + space;
+	int need = mSize + space;
 	if( need > mTotal ) {
 		int total = mTotal < 256 ? 256 : mTotal;
 
@@ -59,10 +59,26 @@ int SP_ProtoBufEncoder :: addVarint( int fieldNumber, uint64_t value )
 
 	uint64_t key = ( fieldNumber << 3 ) | SP_ProtoBufDecoder::eWireVarint;
 
-	mLen += encodeVarint( key, mBuffer + mLen );
-	mLen += encodeVarint( value, mBuffer + mLen );
+	mSize += encodeVarint( key, mBuffer + mSize );
+	mSize += encodeVarint( value, mBuffer + mSize );
 
 	return 0;
+}
+
+int SP_ProtoBufEncoder :: addDouble( int fieldNumber, double value )
+{
+	uint64_t tmp;
+	memcpy( &tmp, &value, sizeof( tmp ) );
+
+	return addVarint( fieldNumber, tmp );
+}
+
+int SP_ProtoBufEncoder :: addFloat( int fieldNumber, float value )
+{
+	uint32_t tmp;
+	memcpy( &tmp, &value, sizeof( tmp ) );
+
+	return addVarint( fieldNumber, tmp );
 }
 
 int SP_ProtoBufEncoder :: add64Bit( int fieldNumber, uint64_t value )
@@ -71,8 +87,8 @@ int SP_ProtoBufEncoder :: add64Bit( int fieldNumber, uint64_t value )
 
 	uint64_t key = ( fieldNumber << 3 ) | SP_ProtoBufDecoder::eWire64Bit;
 
-	mLen += encodeVarint( key, mBuffer + mLen );
-	mLen += encode64Bit( value, mBuffer + mLen );
+	mSize += encodeVarint( key, mBuffer + mSize );
+	mSize += encode64Bit( value, mBuffer + mSize );
 
 	return 0;
 }
@@ -83,11 +99,11 @@ int SP_ProtoBufEncoder :: addBinary( int fieldNumber, const char * buffer, int l
 
 	uint64_t key = ( fieldNumber << 3 ) | SP_ProtoBufDecoder::eWireBinary;
 
-	mLen += encodeVarint( key, mBuffer + mLen );
-	mLen += encodeVarint( len, mBuffer + mLen );
+	mSize += encodeVarint( key, mBuffer + mSize );
+	mSize += encodeVarint( len, mBuffer + mSize );
 
-	memcpy( mBuffer + mLen, buffer, len );
-	mLen += len;
+	memcpy( mBuffer + mSize, buffer, len );
+	mSize += len;
 
 	return 0;
 }
@@ -98,8 +114,99 @@ int SP_ProtoBufEncoder :: add32Bit( int fieldNumber, uint32_t value )
 
 	uint64_t key = ( fieldNumber << 3 ) | SP_ProtoBufDecoder::eWire32Bit;
 
-	mLen += encodeVarint( key, mBuffer + mLen );
-	mLen += encode32Bit( value, mBuffer + mLen );
+	mSize += encodeVarint( key, mBuffer + mSize );
+	mSize += encode32Bit( value, mBuffer + mSize );
+
+	return 0;
+}
+
+int SP_ProtoBufEncoder :: addPacked( int fieldNumber, uint16_t * array, int size )
+{
+	char * buffer = (char*)malloc( sizeof( uint16_t ) * 2 * size );
+
+	char * pos = buffer;
+	for( int i = 0; i < size; i++ ) {
+		int ret = encodeVarint( array[i], pos );
+		pos += ret;
+	}
+
+	addBinary( fieldNumber, buffer, pos - buffer );
+
+	free( buffer );
+
+	return 0;
+}
+
+int SP_ProtoBufEncoder :: addPacked( int fieldNumber, uint32_t * array, int size )
+{
+	char * buffer = (char*)malloc( sizeof( uint32_t ) * 2 * size );
+
+	char * pos = buffer;
+	for( int i = 0; i < size; i++ ) {
+		int ret = encodeVarint( array[i], pos );
+		pos += ret;
+	}
+
+	addBinary( fieldNumber, buffer, pos - buffer );
+
+	free( buffer );
+
+	return 0;
+}
+
+int SP_ProtoBufEncoder :: addPacked( int fieldNumber, uint64_t * array, int size )
+{
+	char * buffer = (char*)malloc( sizeof( uint64_t ) * 2 * size );
+
+	char * pos = buffer;
+	for( int i = 0; i < size; i++ ) {
+		int ret = encodeVarint( array[i], pos );
+		pos += ret;
+	}
+
+	addBinary( fieldNumber, buffer, pos - buffer );
+
+	free( buffer );
+
+	return 0;
+}
+
+int SP_ProtoBufEncoder :: addPacked( int fieldNumber, float * array, int size )
+{
+	char * buffer = (char*)malloc( sizeof( float ) * 2 * size );
+
+	char * pos = buffer;
+	for( int i = 0; i < size; i++ ) {
+		uint32_t tmp;
+		memcpy( &tmp, array + i, sizeof( tmp ) );
+
+		int ret = encodeVarint( tmp, pos );
+		pos += ret;
+	}
+
+	addBinary( fieldNumber, buffer, pos - buffer );
+
+	free( buffer );
+
+	return 0;
+}
+
+int SP_ProtoBufEncoder :: addPacked( int fieldNumber, double * array, int size )
+{
+	char * buffer = (char*)malloc( sizeof( double ) * 2 * size );
+
+	char * pos = buffer;
+	for( int i = 0; i < size; i++ ) {
+		uint64_t tmp;
+		memcpy( &tmp, array + i, sizeof( tmp ) );
+
+		int ret = encodeVarint( tmp, pos );
+		pos += ret;
+	}
+
+	addBinary( fieldNumber, buffer, pos - buffer );
+
+	free( buffer );
 
 	return 0;
 }
@@ -109,9 +216,9 @@ const char * SP_ProtoBufEncoder :: getBuffer()
 	return mBuffer;
 }
 
-int SP_ProtoBufEncoder :: getLen()
+int SP_ProtoBufEncoder :: getSize()
 {
-	return mLen;
+	return mSize;
 }
 
 int SP_ProtoBufEncoder :: encodeVarint( uint64_t value, char *buffer )
@@ -203,6 +310,7 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	int ret = 0;
 
 	const char * curr = buffer;
+	memset( pair, 0, sizeof( KeyValPair_t ) );
 
 	uint64_t tmpVal = 0;
 	int pos = decodeVarint( &tmpVal, curr );
@@ -215,14 +323,14 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	switch( pair->mWireType )
 	{
 		case eWireVarint:
-			pos = decodeVarint( &pair->mValue.mVarint, curr );
+			pos = decodeVarint( &pair->mVarint, curr );
 			curr += pos;
 			break;
 
 		case eWire64Bit:
-			pair->mValue.m64Bit = decode32Bit( curr );
+			pair->m64Bit = decode32Bit( curr );
 			curr += 4;
-			pair->mValue.m64Bit |= (uint64_t)decode32Bit( curr ) << 32;
+			pair->m64Bit |= (uint64_t)decode32Bit( curr ) << 32;
 			curr += 4;
 			break;
 
@@ -230,13 +338,13 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 			pos = decodeVarint( &tmpVal, curr );
 			curr += pos;
 
-			pair->mValue.mBinary.mLen = tmpVal;
-			pair->mValue.mBinary.mBuffer = curr ;
+			pair->mBinary.mLen = tmpVal;
+			pair->mBinary.mBuffer = curr ;
 			curr += tmpVal;
 			break;
 
 		case eWire32Bit:
-			pair->mValue.m32Bit = decode32Bit( curr );
+			pair->m32Bit = decode32Bit( curr );
 			curr += 4;
 			break;
 
@@ -286,5 +394,106 @@ char * SP_ProtoBufDecoder :: dup( const char * buffer, int len )
 	ret[ len ] = '\0';
 
 	return ret;
+}
+
+int SP_ProtoBufDecoder :: getPacked( const char * buffer, int len, uint16_t * array, int size )
+{
+	int count = 0;
+
+	const char * pos = buffer;
+
+	for( int i = 0; i < size && ( pos - buffer ) < len; i++ ) {
+		uint64_t tmp;
+
+		int ret = decodeVarint( &tmp, pos );
+		pos += ret;
+
+		array[i] = tmp;
+
+		count++;
+	}
+
+	return count;
+}
+
+int SP_ProtoBufDecoder :: getPacked( const char * buffer, int len, uint32_t * array, int size )
+{
+	int count = 0;
+
+	const char * pos = buffer;
+
+	for( int i = 0; i < size && ( pos - buffer ) < len; i++ ) {
+		uint64_t tmp;
+
+		int ret = decodeVarint( &tmp, pos );
+		pos += ret;
+
+		array[i] = tmp;
+
+		count++;
+	}
+
+	return count;
+}
+
+int SP_ProtoBufDecoder :: getPacked( const char * buffer, int len, uint64_t * array, int size )
+{
+	int count = 0;
+
+	const char * pos = buffer;
+
+	for( int i = 0; i < size && ( pos - buffer ) < len; i++ ) {
+		uint64_t tmp;
+
+		int ret = decodeVarint( &tmp, pos );
+		pos += ret;
+
+		array[i] = tmp;
+
+		count++;
+	}
+
+	return count;
+}
+
+int SP_ProtoBufDecoder :: getPacked( const char * buffer, int len, float * array, int size )
+{
+	int count = 0;
+
+	const char * pos = buffer;
+
+	for( int i = 0; i < size && ( pos - buffer ) < len; i++ ) {
+		uint64_t tmp;
+
+		int ret = decodeVarint( &tmp, pos );
+		pos += ret;
+
+		uint32_t tmp32 = tmp;
+		memcpy( array + i, &tmp32, sizeof( tmp32 ) );
+
+		count++;
+	}
+
+	return count;
+}
+
+int SP_ProtoBufDecoder :: getPacked( const char * buffer, int len, double * array, int size )
+{
+	int count = 0;
+
+	const char * pos = buffer;
+
+	for( int i = 0; i < size && ( pos - buffer ) < len; i++ ) {
+		uint64_t tmp;
+
+		int ret = decodeVarint( &tmp, pos );
+		pos += ret;
+
+		memcpy( array + i, &tmp, sizeof( tmp ) );
+
+		count++;
+	}
+
+	return count;
 }
 
