@@ -27,6 +27,13 @@ SP_ProtoBufEncoder :: ~SP_ProtoBufEncoder()
 	mLen = 0;
 }
 
+void SP_ProtoBufEncoder :: reset()
+{
+	mLen = 0;
+
+	if( NULL != mBuffer ) memset( mBuffer, 0, mTotal );
+}
+
 int SP_ProtoBufEncoder :: ensureSpace( int space )
 {
 	int need = mLen + space;
@@ -241,7 +248,7 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	return 0 == ret ? ( curr - buffer ) : -1;
 }
 
-bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair )
+bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
 {
 	bool isExist = false;
 
@@ -253,8 +260,12 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair )
 		if( ret < 0 ) break;
 
 		if( pair->mFieldNumber == fieldNumber ) {
-			isExist = true;
-			break;
+			index--;
+
+			if( index < 0 ) {
+				isExist = true;
+				break;
+			}
 		}
 
 		curr += ret;
@@ -266,5 +277,14 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair )
 void SP_ProtoBufDecoder :: rewind()
 {
 	mCurr = mBuffer;
+}
+
+char * SP_ProtoBufDecoder :: dup( const char * buffer, int len )
+{
+	char * ret = (char*)malloc( len + 1 );
+	memcpy( ret, buffer, len );
+	ret[ len ] = '\0';
+
+	return ret;
 }
 

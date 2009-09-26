@@ -22,6 +22,8 @@ public:
 	const char * getBuffer();
 	int getLen();
 
+	void reset();
+
 private:
 	static int encodeVarint( uint64_t value, char *buffer );
 
@@ -71,9 +73,11 @@ public:
 
 	bool getNext( KeyValPair_t * pair );
 
-	bool find( int fieldNumber, KeyValPair_t * pair );
+	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
 	void rewind();
+
+	static char * dup( const char * buffer, int len );
 
 private:
 
