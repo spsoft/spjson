@@ -13,12 +13,14 @@
 
 #include "spprotobuf.hpp"
 
-void printAll( SP_ProtoBufReader * reader )
+void printAll( const char * buffer, int len )
 {
-	SP_ProtoBufReader::KeyValPair_t pair;
+	SP_ProtoBufDecoder decoder( buffer, len );
+
+	SP_ProtoBufDecoder::KeyValPair_t pair;
 
 	for( ; ; ) {
-		if( ! reader->getNext( &pair ) ) break;
+		if( ! decoder.getNext( &pair ) ) break;
 
     	printf("field number: %d, wire type %d\n",
 				pair.mFieldNumber, pair.mWireType );
@@ -26,13 +28,13 @@ void printAll( SP_ProtoBufReader * reader )
 		printf( "\tvalue: " );
 
 		switch( pair.mWireType ) {
-			case SP_ProtoBufReader::eWireVarint:
+			case SP_ProtoBufDecoder::eWireVarint:
 				printf( "%lld\n",  pair.mValue.mVarint );
 				break;
-			case SP_ProtoBufReader::eWire64Bit:
+			case SP_ProtoBufDecoder::eWire64Bit:
 				printf( "%lld\n",  pair.mValue.mVarint );
 				break;
-			case SP_ProtoBufReader::eWireBinary:
+			case SP_ProtoBufDecoder::eWireBinary:
 			{
 				const char * buf = pair.mValue.mBinary.mBuffer;
 				int len = pair.mValue.mBinary.mLen;
@@ -57,15 +59,14 @@ void printAll( SP_ProtoBufReader * reader )
 
 					printf( "{{{\n" );
 
-					SP_ProtoBufReader tmpReader( buf, len );
-					printAll( &tmpReader );
+					printAll( buf, len );
 
 					printf( "}}}\n" );
 				}
 
 				break;
 			}
-			case SP_ProtoBufReader::eWire32Bit:
+			case SP_ProtoBufDecoder::eWire32Bit:
 				printf( "%d\n", pair.mValue.m32Bit );
 				break;
 			default:
@@ -73,6 +74,29 @@ void printAll( SP_ProtoBufReader * reader )
 				break;
 		}
 	}
+}
+
+void testEncoder()
+{
+	SP_ProtoBufEncoder addrbook;
+
+	{
+		SP_ProtoBufEncoder person;
+
+		person.addBinary( 1, "abc", 3 );
+		person.addVarint( 2, 1 );
+		person.addBinary( 3, "abc@abc.com", 11 );
+
+		SP_ProtoBufEncoder phone;
+		phone.addBinary( 1, "12345", 5 );
+		phone.addVarint( 2, 0 );
+
+		person.addBinary( 4, phone.getBuffer(), phone.getLen() );
+
+		addrbook.addBinary( 1, person.getBuffer(), person.getLen() );
+	}
+
+	printAll( addrbook.getBuffer(), addrbook.getLen() );
 }
 
 int main( int argc, char * argv[] )
@@ -106,12 +130,14 @@ int main( int argc, char * argv[] )
 	source[ aStat.st_size ] = '\0';
 
 	{
-		SP_ProtoBufReader reader( source, aStat.st_size );
-
-		printAll( &reader );
+		printAll( source, aStat.st_size );
 	}
 
 	free( source );
+
+	{
+		testEncoder();
+	}
 
 	return 0;
 }

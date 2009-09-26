@@ -8,10 +8,38 @@
 
 #include <stdint.h>
 
+class SP_ProtoBufEncoder
+{
+public:
+	SP_ProtoBufEncoder( int initLen = 0 );
+	~SP_ProtoBufEncoder();
+
+	int addVarint( int fieldNumber, uint64_t value );
+	int add64Bit( int fieldNumber, uint64_t value );
+	int addBinary( int fieldNumber, const char * buffer, int len );
+	int add32Bit( int fieldNumber, uint32_t value );
+
+	const char * getBuffer();
+	int getLen();
+
+private:
+	static int encodeVarint( uint64_t value, char *buffer );
+
+	static int encode32Bit( uint32_t value, char * buffer );
+
+	static int encode64Bit( uint64_t value, char * buffer );
+
+	int ensureSpace( int space );
+
+private:
+	char * mBuffer;
+	int mTotal, mLen;
+};
+
 /**
- * a simple reader for protobuf
+ * a simple decoder for protobuf
  */
-class SP_ProtoBufReader
+class SP_ProtoBufDecoder
 {
 public:
 
@@ -38,8 +66,8 @@ public:
 
 public:
 
-	SP_ProtoBufReader( const char * buffer, int len );
-	~SP_ProtoBufReader();
+	SP_ProtoBufDecoder( const char * buffer, int len );
+	~SP_ProtoBufDecoder();
 
 	bool getNext( KeyValPair_t * pair );
 
@@ -52,7 +80,7 @@ private:
 	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
 	static int decodeVarint( uint64_t *value, const char *buffer );
 
-	static uint32_t get32Bit( const char * buffer );
+	static uint32_t decode32Bit( const char * buffer );
 
 	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
 	static int getPair( const char * buffer, KeyValPair_t * pair );
