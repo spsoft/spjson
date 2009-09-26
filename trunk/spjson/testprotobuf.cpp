@@ -13,6 +13,15 @@
 
 #include "spprotobuf.hpp"
 
+void printString( const char * buffer, int len )
+{
+	char * tmp = SP_ProtoBufDecoder::dup( buffer, len );
+
+	printf( "%s", tmp );
+
+	free( tmp );
+}
+
 void printAll( const char * buffer, int len )
 {
 	SP_ProtoBufDecoder decoder( buffer, len );
@@ -49,11 +58,8 @@ void printAll( const char * buffer, int len )
 				}
 
 				if( isString ) {
-					char * tmp = (char*)malloc( len + 1 );
-					memcpy( tmp, buf, len );
-					tmp[ len ] = '\0';
-					printf( "%s\n", tmp );
-					free( tmp );
+					printString( buf, len );
+					printf( "\n" );
 				} else {
 					printf( "buffer %p, len %d\n", buf, len );
 
@@ -93,47 +99,79 @@ void testEncoder()
 
 		person.addBinary( 4, phone.getBuffer(), phone.getLen() );
 
+		phone.reset();
+
+		phone.addBinary( 1, "6789", 4 );
+		phone.addVarint( 2, 1 );
+		person.addBinary( 4, phone.getBuffer(), phone.getLen() );
+
 		addrbook.addBinary( 1, person.getBuffer(), person.getLen() );
 	}
 
+	{
+		const char * filename = "testprotobuf.db";
+
+		printf( "\nwrite addrbook info into %s ...\n\n", filename );
+
+		FILE * fp = fopen( filename, "w" );
+		if( NULL != fp ) {
+			fwrite( addrbook.getBuffer(), 1, addrbook.getLen(), fp );
+			fclose( fp );
+		}
+	}
+
+	printf( "decode addrbook info ...\n\n" );
+
 	printAll( addrbook.getBuffer(), addrbook.getLen() );
+
+	SP_ProtoBufDecoder decoder( addrbook.getBuffer(), addrbook.getLen() );
+
+	SP_ProtoBufDecoder::KeyValPair_t pair;
+	assert( decoder.find( 1, &pair ) );
+
+	{
+		SP_ProtoBufDecoder person( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+		assert( person.find( 4, &pair, 1 ) );
+		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
+
+		SP_ProtoBufDecoder phone( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+		assert( phone.find( 1, &pair ) );
+		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
+
+		char * tmp = SP_ProtoBufDecoder::dup( pair.mValue.mBinary.mBuffer, pair.mValue.mBinary.mLen );
+
+		assert( 0 == strcmp( tmp, "6789" ) );
+
+		free( tmp );
+	}
 }
 
 int main( int argc, char * argv[] )
 {
-	if( argc < 2 ) {
-		printf( "Usage: %s <file>\n", argv[0] );
-		return -1;
-	}
+	if( argc > 1 ) {
+		const char * filename = argv[1];
 
-	char * filename = NULL;
+		FILE * fp = fopen ( filename, "r" );
+		if( NULL == fp ) {
+			printf( "cannot not open %s\n", filename );
+			exit( -1 );
+		}
 
-	if( argc < 2 ) {
-		printf( "Usage: %s <json_file>\n", argv[0] );
-		exit( -1 );
-	} else {
-		filename = argv[1];
-	}
+		struct stat aStat;
+		char * source = NULL;
+		stat( filename, &aStat );
+		source = ( char * ) malloc ( aStat.st_size + 1 );
+		fread ( source, aStat.st_size, sizeof ( char ), fp );
+		fclose ( fp );
+		source[ aStat.st_size ] = '\0';
 
-	FILE * fp = fopen ( filename, "r" );
-	if( NULL == fp ) {
-		printf( "cannot not open %s\n", filename );
-		exit( -1 );
-	}
 
-	struct stat aStat;
-	char * source = NULL;
-	stat( filename, &aStat );
-	source = ( char * ) malloc ( aStat.st_size + 1 );
-	fread ( source, aStat.st_size, sizeof ( char ), fp );
-	fclose ( fp );
-	source[ aStat.st_size ] = '\0';
+		printf( "\ndecode file -- %s ...\n\n", filename );
 
-	{
 		printAll( source, aStat.st_size );
-	}
 
-	free( source );
+		free( source );
+	}
 
 	{
 		testEncoder();
