@@ -331,15 +331,15 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	{
 		case eWireVarint:
 			pos = decodeVarint( &tmpVal, curr );
-			pair->mVarint = tmpVal;
+			pair->mVarint.u = tmpVal;
 			pair->mZigZagInt = ( (tmpVal >> 1) ^ - (int64_t)(tmpVal & 1) );
 			curr += pos;
 			break;
 
 		case eWire64Bit:
-			pair->m64Bit = decode32Bit( curr );
+			pair->m64Bit.u = decode32Bit( curr );
 			curr += 4;
-			pair->m64Bit |= (uint64_t)decode32Bit( curr ) << 32;
+			pair->m64Bit.u |= (uint64_t)decode32Bit( curr ) << 32;
 			curr += 4;
 			break;
 
@@ -353,7 +353,7 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 			break;
 
 		case eWire32Bit:
-			pair->m32Bit = decode32Bit( curr );
+			pair->m32Bit.u = decode32Bit( curr );
 			curr += 4;
 			break;
 

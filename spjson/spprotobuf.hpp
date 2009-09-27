@@ -67,17 +67,27 @@ public:
 		int mFieldNumber;
 		int mWireType;
 
-		uint64_t mVarint;    // wire type 0
+		union {              // wire type 0
+			uint64_t u;
+			int64_t  s;
+		} mVarint;
+
 		int64_t  mZigZagInt; // wire type 0
 
-		uint64_t m64Bit;   // wire type 1
+		union {              // wire type 1
+			uint64_t u;
+			int64_t  s;
+		} m64Bit;
 
-		struct {
+		struct {             // wire type 2
 			const char * mBuffer;
 			int mLen;
-		} mBinary;         // wire type 2
+		} mBinary;
 
-		uint32_t m32Bit;   // wire type 5
+		union {              // wire type 5
+			uint32_t u;
+			int32_t  s;
+		} m32Bit;
 	} KeyValPair_t;
 
 public:
