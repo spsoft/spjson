@@ -65,6 +65,13 @@ int SP_ProtoBufEncoder :: addVarint( int fieldNumber, uint64_t value )
 	return 0;
 }
 
+int SP_ProtoBufEncoder :: addZigZagInt( int fieldNumber, int64_t value )
+{
+	uint64_t tmpVal = ( value << 1 ) ^ ( value >> 63 );
+
+	return addVarint( fieldNumber, tmpVal );
+}
+
 int SP_ProtoBufEncoder :: addDouble( int fieldNumber, double value )
 {
 	uint64_t tmp;
@@ -323,7 +330,9 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	switch( pair->mWireType )
 	{
 		case eWireVarint:
-			pos = decodeVarint( &pair->mVarint, curr );
+			pos = decodeVarint( &tmpVal, curr );
+			pair->mVarint = tmpVal;
+			pair->mZigZagInt = ( (tmpVal >> 1) ^ - (int64_t)(tmpVal & 1) );
 			curr += pos;
 			break;
 

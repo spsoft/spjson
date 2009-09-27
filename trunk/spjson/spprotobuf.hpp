@@ -15,6 +15,8 @@ public:
 	~SP_ProtoBufEncoder();
 
 	int addVarint( int fieldNumber, uint64_t value );
+	int addZigZagInt( int fieldNumber, int64_t value );
+
 	int addDouble( int fieldNumber, double value );
 	int addFloat( int fieldNumber, float value );
 
@@ -65,7 +67,8 @@ public:
 		int mFieldNumber;
 		int mWireType;
 
-		uint64_t mVarint;  // wire type 0
+		uint64_t mVarint;    // wire type 0
+		int64_t  mZigZagInt; // wire type 0
 
 		uint64_t m64Bit;   // wire type 1
 
