@@ -38,10 +38,10 @@ void printAll( const char * buffer, int len )
 
 		switch( pair.mWireType ) {
 			case SP_ProtoBufDecoder::eWireVarint:
-				printf( "%lld\n",  pair.mVarint );
+				printf( "%lld\n",  pair.mVarint.u );
 				break;
 			case SP_ProtoBufDecoder::eWire64Bit:
-				printf( "%lld\n",  pair.mVarint );
+				printf( "%lld\n",  pair.mVarint.u );
 				break;
 			case SP_ProtoBufDecoder::eWireBinary:
 			{
@@ -73,7 +73,7 @@ void printAll( const char * buffer, int len )
 				break;
 			}
 			case SP_ProtoBufDecoder::eWire32Bit:
-				printf( "%d\n", pair.m32Bit );
+				printf( "%d\n", pair.m32Bit.u );
 				break;
 			default:
 				printf( "unknown\n" );
