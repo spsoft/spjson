@@ -77,6 +77,7 @@ public:
 		union {              // wire type 1
 			uint64_t u;
 			int64_t  s;
+			double   d;
 		} m64Bit;
 
 		struct {             // wire type 2
@@ -87,6 +88,7 @@ public:
 		union {              // wire type 5
 			uint32_t u;
 			int32_t  s;
+			float    f;
 		} m32Bit;
 	} KeyValPair_t;
 
