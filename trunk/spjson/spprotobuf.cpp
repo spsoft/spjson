@@ -371,7 +371,7 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index
 
 	const char * curr = mBuffer;
 
-	for( ; ; ) {
+	for( ; curr < mEnd; ) {
 		int ret = getPair( curr, pair );
 
 		if( ret < 0 ) break;
