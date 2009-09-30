@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "spprotobuf.hpp"
+#include "sppbcodec.hpp"
 
 SP_ProtoBufEncoder :: SP_ProtoBufEncoder( int initLen )
 {

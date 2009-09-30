@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "spprotobuf.hpp"
+#include "sppbcodec.hpp"
 
 void printString( const char * buffer, int len )
 {
