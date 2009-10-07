@@ -15,7 +15,7 @@ RM = /bin/rm -f
 
 LIBOBJS = spjsonutils.o spjsoncodec.o spjsonevent.o spjsonreader.o \
 		spjsonparser.o spjsonnode.o spjsoniterator.o spjsondomparser.o \
-		spjsonhandle.o spjsonrpc.o sppbcodec.o
+		spjsonhandle.o spjsonrpc.o sppbfield.o sppbcodec.o
 
 TARGET =  libspjson.so libspjson.a \
 		testpull testdom testhandle testrpc testprotobuf
