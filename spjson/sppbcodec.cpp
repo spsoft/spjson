@@ -357,12 +357,12 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index
 			offset = field->mOffset;
 		}
 
-		pair->mRepeatedCount = count;
-
 		if( offset >= 0 && ( mBuffer + offset ) < mEnd ) {
 			getPair( mBuffer + offset, pair );
 			isExist = true;
 		}
+
+		pair->mRepeatedCount = count;
 	}
 
 	return isExist;
