@@ -36,11 +36,6 @@ public:
 	void reset();
 
 private:
-	static int encodeVarint( uint64_t value, char *buffer );
-
-	static int encode32Bit( uint32_t value, char * buffer );
-
-	static int encode64Bit( uint64_t value, char * buffer );
 
 	int ensureSpace( int space );
 
@@ -49,9 +44,6 @@ private:
 	int mTotal, mSize;
 };
 
-/**
- * a simple decoder for protobuf
- */
 class SP_ProtoBufDecoder
 {
 public:
@@ -99,9 +91,23 @@ public:
 
 	bool getNext( KeyValPair_t * pair );
 
+	void rewind();
+
 	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
-	void rewind();
+private:
+
+	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
+	static int getPair( const char * buffer, KeyValPair_t * pair );
+
+private:
+	const char * mBuffer, * mEnd;
+	const char * mCurr;
+};
+
+class SP_ProtoBufCodecUtils
+{
+public:
 
 	static char * dup( const char * buffer, int len );
 
@@ -111,19 +117,20 @@ public:
 	static int getPacked( const char * buffer, int len, float * array, int size );
 	static int getPacked( const char * buffer, int len, double * array, int size );
 
-private:
-
 	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
 	static int decodeVarint( uint64_t *value, const char *buffer );
 
 	static uint32_t decode32Bit( const char * buffer );
 
-	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
-	static int getPair( const char * buffer, KeyValPair_t * pair );
+	static int encodeVarint( uint64_t value, char *buffer );
+
+	static int encode32Bit( uint32_t value, char * buffer );
+
+	static int encode64Bit( uint64_t value, char * buffer );
 
 private:
-	const char * mBuffer, * mEnd;
-	const char * mCurr;
+	SP_ProtoBufCodecUtils();
+	~SP_ProtoBufCodecUtils();
 };
 
 #endif
