@@ -15,7 +15,7 @@
 
 void printString( const char * buffer, int len )
 {
-	char * tmp = SP_ProtoBufDecoder::dup( buffer, len );
+	char * tmp = SP_ProtoBufCodecUtils::dup( buffer, len );
 
 	printf( "%s", tmp );
 
@@ -138,7 +138,7 @@ void testEncoder()
 		assert( phone.find( 1, &pair ) );
 		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
 
-		char * tmp = SP_ProtoBufDecoder::dup( pair.mBinary.mBuffer, pair.mBinary.mLen );
+		char * tmp = SP_ProtoBufCodecUtils::dup( pair.mBinary.mBuffer, pair.mBinary.mLen );
 
 		assert( 0 == strcmp( tmp, "6789" ) );
 
@@ -164,7 +164,7 @@ void testPacked()
 
 	uint16_t array[ 100 ] = { 0 };
 
-	int count = SP_ProtoBufDecoder::getPacked( pair.mBinary.mBuffer, pair.mBinary.mLen, array, 100 );
+	int count = SP_ProtoBufCodecUtils::getPacked( pair.mBinary.mBuffer, pair.mBinary.mLen, array, 100 );
 
 	for( int i = 0; i < count; i++ ) {
 		printf( "#%d: %d\n", i, array[i] );
