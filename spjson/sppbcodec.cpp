@@ -336,8 +336,7 @@ void SP_ProtoBufDecoder :: initFieldList()
 	}
 }
 
-bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair,
-		int index, int * repeatedCount )
+bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
 {
 	bool isExist = false;
 
@@ -358,9 +357,9 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair,
 			offset = field->mOffset;
 		}
 
-		if( NULL != repeatedCount ) * repeatedCount = count;
+		pair->mRepeatedCount = count;
 
-		if( offset >= 0 ) {
+		if( offset >= 0 && ( mBuffer + offset ) < mEnd ) {
 			getPair( mBuffer + offset, pair );
 			isExist = true;
 		}

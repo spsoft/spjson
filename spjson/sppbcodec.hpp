@@ -60,6 +60,7 @@ public:
 	typedef struct tagKeyValPair {
 		int mFieldNumber;
 		int mWireType;
+		int mRepeatedCount;
 
 		union {              // wire type 0
 			uint64_t u;
@@ -95,8 +96,7 @@ public:
 
 	void rewind();
 
-	bool find( int fieldNumber, KeyValPair_t * pair,
-			int index = 0, int * repeatedCount = 0 );
+	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
 	void initFieldList();
 

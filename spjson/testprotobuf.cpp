@@ -31,8 +31,8 @@ void printAll( const char * buffer, int len )
 	for( ; ; ) {
 		if( ! decoder.getNext( &pair ) ) break;
 
-    	printf("field number: %d, wire type %d\n",
-				pair.mFieldNumber, pair.mWireType );
+    	printf("field number: %d, wire type %d, repeated count %d\n",
+				pair.mFieldNumber, pair.mWireType, pair.mRepeatedCount );
 
 		printf( "\tvalue: " );
 
@@ -152,7 +152,7 @@ void testPacked()
 
 	SP_ProtoBufEncoder encoder;
 	{
-		uint16_t array[] = { 3, 270, 86942 };
+		uint32_t array[] = { 3, 270, 86942 };
 		encoder.addPacked( 1, array, sizeof( array ) / sizeof( array[0] ) );
 	}
 
@@ -162,7 +162,7 @@ void testPacked()
 
 	assert( decoder.find( 1, &pair ) );
 
-	uint16_t array[ 100 ] = { 0 };
+	uint32_t array[ 100 ] = { 0 };
 
 	int count = SP_ProtoBufCodecUtils::getPacked( pair.mBinary.mBuffer, pair.mBinary.mLen, array, 100 );
 
