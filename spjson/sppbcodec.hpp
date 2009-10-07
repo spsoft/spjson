@@ -44,6 +44,8 @@ private:
 	int mTotal, mSize;
 };
 
+class SP_ProtoBufFieldList;
+
 class SP_ProtoBufDecoder
 {
 public:
@@ -93,7 +95,10 @@ public:
 
 	void rewind();
 
-	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
+	bool find( int fieldNumber, KeyValPair_t * pair,
+			int index = 0, int * repeatedCount = 0 );
+
+	void initFieldList();
 
 private:
 
@@ -103,6 +108,8 @@ private:
 private:
 	const char * mBuffer, * mEnd;
 	const char * mCurr;
+
+	SP_ProtoBufFieldList * mFieldList;
 };
 
 class SP_ProtoBufCodecUtils

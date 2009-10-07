@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "sppbcodec.hpp"
+#include "sppbfield.hpp"
 
 SP_ProtoBufEncoder :: SP_ProtoBufEncoder( int initLen )
 {
@@ -236,6 +237,8 @@ SP_ProtoBufDecoder :: SP_ProtoBufDecoder( const char * buffer, int len )
 	mEnd = mBuffer + len;
 
 	mCurr = mBuffer;
+
+	mFieldList = NULL;
 }
 
 SP_ProtoBufDecoder :: ~SP_ProtoBufDecoder()
@@ -243,6 +246,9 @@ SP_ProtoBufDecoder :: ~SP_ProtoBufDecoder()
 	mBuffer = NULL;
 	mEnd = NULL;
 	mCurr = NULL;
+
+	if( NULL != mFieldList ) delete mFieldList;
+	mFieldList = NULL;
 }
 
 bool SP_ProtoBufDecoder :: getNext( KeyValPair_t * pair )
@@ -309,27 +315,55 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
 	return 0 == ret ? ( curr - buffer ) : -1;
 }
 
-bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
+void SP_ProtoBufDecoder :: initFieldList()
+{
+	if( NULL == mFieldList ) {
+		mFieldList = new SP_ProtoBufFieldList();
+
+		KeyValPair_t pair;
+
+		const char * curr = mBuffer;
+
+		for( ; curr < mEnd; ) {
+			int ret = getPair( curr, &pair );
+
+			if( ret < 0 ) break;
+
+			mFieldList->addFieldOffset( pair.mFieldNumber, curr - mBuffer );
+
+			curr += ret;
+		}
+	}
+}
+
+bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair,
+		int index, int * repeatedCount )
 {
 	bool isExist = false;
 
-	const char * curr = mBuffer;
+	initFieldList();
 
-	for( ; curr < mEnd; ) {
-		int ret = getPair( curr, pair );
+	SP_ProtoBufFieldList::Field_t * field = mFieldList->findField( fieldNumber );
 
-		if( ret < 0 ) break;
+	if( NULL != field ) {
+		int count = 1, offset = -1;
 
-		if( pair->mFieldNumber == fieldNumber ) {
-			index--;
+		if( field->mIsRepeated ) {
+			count = field->mList->mCount;
 
-			if( index < 0 ) {
-				isExist = true;
-				break;
+			if( index >= 0 && index < field->mList->mCount ) {
+				offset = field->mList->mList[ index ];
 			}
+		} else {
+			offset = field->mOffset;
 		}
 
-		curr += ret;
+		if( NULL != repeatedCount ) * repeatedCount = count;
+
+		if( offset >= 0 ) {
+			getPair( mBuffer + offset, pair );
+			isExist = true;
+		}
 	}
 
 	return isExist;
