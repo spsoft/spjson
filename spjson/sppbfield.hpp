@@ -15,7 +15,8 @@ public:
 	} OffsetList_t;
 
 	typedef struct tagField {
-		int mFieldNumber : 30;
+		int mFieldNumber : 28;
+		int mWireType : 3;
 		int mIsRepeated : 1;
 
 		union {
@@ -29,7 +30,7 @@ public:
 	~SP_ProtoBufFieldList();
 
 	// @return 0 : Insert OK, 1 : Append OK, -1 : Fail
-	int addFieldOffset( int fieldNumber, int offset );
+	int addField( int fieldNumber, int wireType, int offset );
 
 	Field_t * findField( int fieldNumber );
 

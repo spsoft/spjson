@@ -233,49 +233,43 @@ int SP_ProtoBufEncoder :: getSize()
 
 SP_ProtoBufDecoder :: SP_ProtoBufDecoder( const char * buffer, int len )
 {
-	mBuffer = buffer;
+	mBuffer = (char*)malloc( len + 1 );
+	memcpy( mBuffer, buffer, len );
+	mBuffer[ len ] = '\0';
+
 	mEnd = mBuffer + len;
 
-	mCurr = mBuffer;
+	mFieldIndex = mRepeatedIndex = 0;
 
 	mFieldList = NULL;
+
+	initFieldList();
 }
 
 SP_ProtoBufDecoder :: ~SP_ProtoBufDecoder()
 {
+	free( mBuffer );
 	mBuffer = NULL;
+
 	mEnd = NULL;
-	mCurr = NULL;
 
 	if( NULL != mFieldList ) delete mFieldList;
 	mFieldList = NULL;
 }
 
-bool SP_ProtoBufDecoder :: getNext( KeyValPair_t * pair )
-{
-	if( mCurr >= mEnd ) return false;
-
-	int ret = getPair( mCurr, pair );
-
-	if( ret > 0 ) mCurr += ret;
-
-	return ret > 0;
-}
-
-int SP_ProtoBufDecoder :: getPair( const char * buffer, KeyValPair_t * pair )
+int SP_ProtoBufDecoder :: getPair( const char * buffer, int fieldNumber,
+			int wireType, KeyValPair_t * pair )
 {
 	int ret = 0;
 
 	const char * curr = buffer;
+
 	memset( pair, 0, sizeof( KeyValPair_t ) );
+	pair->mFieldNumber = fieldNumber;
+	pair->mWireType = wireType;
 
 	uint64_t tmpVal = 0;
-	int pos = SP_ProtoBufCodecUtils::decodeVarint( &tmpVal, curr );
-
-	curr += pos;
-
-	pair->mFieldNumber = tmpVal >> 3;
-	pair->mWireType = tmpVal & 0x07;
+	int pos = 0;
 
 	switch( pair->mWireType )
 	{
@@ -322,25 +316,74 @@ void SP_ProtoBufDecoder :: initFieldList()
 
 		KeyValPair_t pair;
 
-		const char * curr = mBuffer;
+		char * curr = mBuffer;
 
 		for( ; curr < mEnd; ) {
-			int ret = getPair( curr, &pair );
+
+			uint64_t tmpVal = 0;
+
+			int ret = SP_ProtoBufCodecUtils::decodeVarint( &tmpVal, curr );
+
+			int fieldNumber = tmpVal >> 3;
+			int wireType = tmpVal & 0x7;
+
+			// always overwrite the leading fieldnumber element
+			*curr = '\0';
+
+			curr += ret;
+
+			ret = getPair( curr, fieldNumber, wireType, &pair );
 
 			if( ret < 0 ) break;
 
-			mFieldList->addFieldOffset( pair.mFieldNumber, curr - mBuffer );
+			mFieldList->addField( fieldNumber, wireType, curr - mBuffer );
 
 			curr += ret;
 		}
 	}
 }
 
-bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
+bool SP_ProtoBufDecoder :: getNext( KeyValPair_t * pair )
 {
 	bool isExist = false;
 
-	initFieldList();
+	SP_ProtoBufFieldList::Field_t * field = mFieldList->getField( mFieldIndex );
+
+	if( NULL == field ) return false;
+
+	int count = 1, offset = -1;
+
+	if( field->mIsRepeated ) {
+		count = field->mList->mCount;
+
+		if( mRepeatedIndex >= 0 && mRepeatedIndex < field->mList->mCount ) {
+			offset = field->mList->mList[ mRepeatedIndex ];
+			mRepeatedIndex++;
+		}
+
+		if( mRepeatedIndex >= field->mList->mCount ) {
+			mFieldIndex++;
+			mRepeatedIndex = 0;
+		}
+	} else {
+		offset = field->mOffset;
+
+		mFieldIndex++;
+	}
+
+	if( offset >= 0 && ( mBuffer + offset ) < mEnd ) {
+		getPair( mBuffer + offset, field->mFieldNumber, field->mWireType, pair );
+		isExist = true;
+	}
+
+	pair->mRepeatedCount = count;
+
+	return isExist;
+}
+
+bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
+{
+	bool isExist = false;
 
 	SP_ProtoBufFieldList::Field_t * field = mFieldList->findField( fieldNumber );
 
@@ -358,7 +401,7 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index
 		}
 
 		if( offset >= 0 && ( mBuffer + offset ) < mEnd ) {
-			getPair( mBuffer + offset, pair );
+			getPair( mBuffer + offset, field->mFieldNumber, field->mWireType, pair );
 			isExist = true;
 		}
 
@@ -370,7 +413,7 @@ bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index
 
 void SP_ProtoBufDecoder :: rewind()
 {
-	mCurr = mBuffer;
+	mFieldIndex = mRepeatedIndex = 0;
 }
 
 //=========================================================

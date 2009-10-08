@@ -13,15 +13,6 @@
 
 #include "sppbcodec.hpp"
 
-void printString( const char * buffer, int len )
-{
-	char * tmp = SP_ProtoBufCodecUtils::dup( buffer, len );
-
-	printf( "%s", tmp );
-
-	free( tmp );
-}
-
 void printAll( const char * buffer, int len )
 {
 	SP_ProtoBufDecoder decoder( buffer, len );
@@ -58,8 +49,7 @@ void printAll( const char * buffer, int len )
 				}
 
 				if( isString ) {
-					printString( buf, len );
-					printf( "\n" );
+					printf( "[%s]\n", buf );
 				} else {
 					printf( "buffer %p, len %d\n", buf, len );
 
