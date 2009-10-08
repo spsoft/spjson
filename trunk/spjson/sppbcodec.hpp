@@ -98,16 +98,17 @@ public:
 
 	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
+private:
+
 	void initFieldList();
 
-private:
-
 	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
-	static int getPair( const char * buffer, KeyValPair_t * pair );
+	static int getPair( const char * buffer, int fieldNumber,
+			int wireType, KeyValPair_t * pair );
 
 private:
-	const char * mBuffer, * mEnd;
-	const char * mCurr;
+	char * mBuffer, * mEnd;
+	int mFieldIndex, mRepeatedIndex;
 
 	SP_ProtoBufFieldList * mFieldList;
 };

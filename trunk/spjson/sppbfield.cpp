@@ -83,7 +83,7 @@ int SP_ProtoBufFieldList :: binarySearch( int fieldNumber, int * insertPoint,
 	}
 }
 
-int SP_ProtoBufFieldList :: addFieldOffset( int fieldNumber, int offset )
+int SP_ProtoBufFieldList :: addField( int fieldNumber, int wireType, int offset )
 {
 	int ret = -1;
 
@@ -110,6 +110,7 @@ int SP_ProtoBufFieldList :: addFieldOffset( int fieldNumber, int offset )
 
 		Field_t * field = &( mList[ insertPoint ] );
 		field->mFieldNumber = fieldNumber;
+		field->mWireType = wireType;
 		field->mIsRepeated = 0;
 		field->mOffset = offset;
 		++mCount;
