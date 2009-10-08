@@ -22,6 +22,7 @@ public:
 
 	int add64Bit( int fieldNumber, uint64_t value );
 	int addBinary( int fieldNumber, const char * buffer, int len );
+	int addString( int fieldNumber, const char * buffer );
 	int add32Bit( int fieldNumber, uint32_t value );
 
 	int addPacked( int fieldNumber, uint16_t * array, int size );
