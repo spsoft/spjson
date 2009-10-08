@@ -116,6 +116,11 @@ int SP_ProtoBufEncoder :: addBinary( int fieldNumber, const char * buffer, int l
 	return 0;
 }
 
+int SP_ProtoBufEncoder :: addString( int fieldNumber, const char * buffer )
+{
+	return addBinary( fieldNumber, buffer, strlen( buffer ) );
+}
+
 int SP_ProtoBufEncoder :: add32Bit( int fieldNumber, uint32_t value )
 {
 	ensureSpace( sizeof( uint64_t ) * 3 );
@@ -264,7 +269,6 @@ int SP_ProtoBufDecoder :: getPair( const char * buffer, int fieldNumber,
 
 	const char * curr = buffer;
 
-	memset( pair, 0, sizeof( KeyValPair_t ) );
 	pair->mFieldNumber = fieldNumber;
 	pair->mWireType = wireType;
 
@@ -347,6 +351,8 @@ bool SP_ProtoBufDecoder :: getNext( KeyValPair_t * pair )
 {
 	bool isExist = false;
 
+	memset( pair, 0, sizeof( KeyValPair_t ) );
+
 	SP_ProtoBufFieldList::Field_t * field = mFieldList->getField( mFieldIndex );
 
 	if( NULL == field ) return false;
@@ -384,6 +390,8 @@ bool SP_ProtoBufDecoder :: getNext( KeyValPair_t * pair )
 bool SP_ProtoBufDecoder :: find( int fieldNumber, KeyValPair_t * pair, int index )
 {
 	bool isExist = false;
+
+	memset( pair, 0, sizeof( KeyValPair_t ) );
 
 	SP_ProtoBufFieldList::Field_t * field = mFieldList->findField( fieldNumber );
 
