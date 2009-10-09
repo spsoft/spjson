@@ -184,18 +184,18 @@ int SP_ProtoBufFieldList :: ensureOffsetList( Field_t * field, int count )
 		OffsetList_t * newList = (OffsetList_t*)malloc(
 				total * sizeof( int ) + sizeof( OffsetList_t ) );
 
-		newList->mTotal = total;
-
 		if( field->mIsRepeated ) {
 			OffsetList_t * oldList = field->mList;
 			memcpy( newList, oldList,
 				sizeof( int ) * oldList->mTotal + sizeof( OffsetList_t ) );
 
+			newList->mTotal = total;
 			field->mList = newList;
 			free( oldList );
 		} else {
 			newList->mList[0] = field->mOffset;
 			newList->mCount = 1;
+			newList->mTotal = total;
 
 			field->mIsRepeated = 1;
 			field->mList = newList;
