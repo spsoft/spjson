@@ -14,8 +14,18 @@ class SP_JsonArrayList;
 
 class SP_ProtoBufTree {
 public:
-	SP_ProtoBufTree( const char * buffer, int len );
+	SP_ProtoBufTree();
 	~SP_ProtoBufTree();
+
+	/**
+	 * @brief attach the buffer to the decoder
+	 * 
+	 * @note  1. The buffer will been modified by the decoder
+	 *        2. It is the caller's responsibility to free the buffer
+	 */
+	int attach( char * buffer, int len );
+
+	int copyFrom( const char * buffer, int len );
 
 	SP_ProtoBufDecoder * getDecoder();
 

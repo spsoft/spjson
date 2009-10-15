@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "sppbcodec.hpp"
 #include "sppbfield.hpp"
@@ -236,24 +237,21 @@ int SP_ProtoBufEncoder :: getSize()
 
 //=========================================================
 
-SP_ProtoBufDecoder :: SP_ProtoBufDecoder( const char * buffer, int len )
+SP_ProtoBufDecoder :: SP_ProtoBufDecoder()
 {
-	mBuffer = (char*)malloc( len + 1 );
-	memcpy( mBuffer, buffer, len );
-	mBuffer[ len ] = '\0';
+	mNeedToFree = 0;
 
-	mEnd = mBuffer + len;
+	mBuffer = NULL;
+	mEnd = NULL;
 
 	mFieldIndex = mRepeatedIndex = 0;
-
 	mFieldList = NULL;
-
-	initFieldList();
 }
 
 SP_ProtoBufDecoder :: ~SP_ProtoBufDecoder()
 {
-	free( mBuffer );
+	if( mNeedToFree ) free( mBuffer );
+
 	mBuffer = NULL;
 
 	mEnd = NULL;
@@ -262,12 +260,49 @@ SP_ProtoBufDecoder :: ~SP_ProtoBufDecoder()
 	mFieldList = NULL;
 }
 
-int SP_ProtoBufDecoder :: getPair( const char * buffer, int fieldNumber,
+int SP_ProtoBufDecoder :: attach( char * buffer, int len )
+{
+	assert( NULL == mBuffer );
+
+	mNeedToFree = 0;
+
+	mBuffer = buffer;
+	mEnd = mBuffer + len;
+
+	mFieldIndex = mRepeatedIndex = 0;
+	mFieldList = NULL;
+
+	initFieldList();
+
+	return 0;
+}
+
+int SP_ProtoBufDecoder :: copyFrom( const char * buffer, int len )
+{
+	assert( NULL == mBuffer );
+
+	mNeedToFree = 1;
+
+	mBuffer = (char*)malloc( len + 1 );
+	memcpy( mBuffer, buffer, len );
+	mBuffer[ len ] = '\0';
+
+	mEnd = mBuffer + len;
+
+	mFieldIndex = mRepeatedIndex = 0;
+	mFieldList = NULL;
+
+	initFieldList();
+
+	return 0;
+}
+
+int SP_ProtoBufDecoder :: getPair( char * buffer, int fieldNumber,
 			int wireType, KeyValPair_t * pair )
 {
 	int ret = 0;
 
-	const char * curr = buffer;
+	char * curr = buffer;
 
 	pair->mFieldNumber = fieldNumber;
 	pair->mWireType = wireType;

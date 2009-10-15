@@ -13,9 +13,12 @@
 
 #include "sppbcodec.hpp"
 
-void printAll( const char * buffer, int len )
+extern void printAllConst( const char * buffer, int len );
+
+void printAll( char * buffer, int len )
 {
-	SP_ProtoBufDecoder decoder( buffer, len );
+	SP_ProtoBufDecoder decoder;
+	decoder.attach( buffer, len );
 
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 
@@ -55,7 +58,7 @@ void printAll( const char * buffer, int len )
 
 					printf( "{{{\n" );
 
-					printAll( buf, len );
+					printAllConst( buf, len );
 
 					printf( "}}}\n" );
 				}
@@ -70,6 +73,17 @@ void printAll( const char * buffer, int len )
 				break;
 		}
 	}
+}
+
+void printAllConst( const char * buffer, int len )
+{
+	char * tmp = (char*)malloc( len + 1 );
+	memcpy( tmp, buffer, len );
+	tmp[ len ] = '\0';
+
+	printAll( tmp, len );
+
+	free( tmp );
 }
 
 void testEncoder()
@@ -112,19 +126,24 @@ void testEncoder()
 
 	printf( "decode addrbook info ...\n\n" );
 
-	printAll( addrbook.getBuffer(), addrbook.getSize() );
+	printAllConst( addrbook.getBuffer(), addrbook.getSize() );
 
-	SP_ProtoBufDecoder decoder( addrbook.getBuffer(), addrbook.getSize() );
+	SP_ProtoBufDecoder decoder;
+	decoder.copyFrom( addrbook.getBuffer(), addrbook.getSize() );
 
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 	assert( decoder.find( 1, &pair ) );
 
 	{
-		SP_ProtoBufDecoder person( pair.mBinary.mBuffer, pair.mBinary.mLen );
+		SP_ProtoBufDecoder person;
+		person.copyFrom( pair.mBinary.mBuffer, pair.mBinary.mLen );
+
 		assert( person.find( 4, &pair, 1 ) );
 		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
 
-		SP_ProtoBufDecoder phone( pair.mBinary.mBuffer, pair.mBinary.mLen );
+		SP_ProtoBufDecoder phone;
+		phone.copyFrom( pair.mBinary.mBuffer, pair.mBinary.mLen );
+
 		assert( phone.find( 1, &pair ) );
 		assert( SP_ProtoBufDecoder::eWireBinary == pair.mWireType );
 
@@ -146,7 +165,8 @@ void testPacked()
 		encoder.addPacked( 1, array, sizeof( array ) / sizeof( array[0] ) );
 	}
 
-	SP_ProtoBufDecoder decoder( encoder.getBuffer(), encoder.getSize() );
+	SP_ProtoBufDecoder decoder;
+	decoder.copyFrom( encoder.getBuffer(), encoder.getSize() );
 
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 

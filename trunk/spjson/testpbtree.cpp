@@ -64,7 +64,8 @@ void testTree()
 		encoder.addBinary( 3, tmp.getBuffer(), tmp.getSize() );
 	}
 
-	SP_ProtoBufTree tree( encoder.getBuffer(), encoder.getSize() );
+	SP_ProtoBufTree tree;
+	tree.copyFrom( encoder.getBuffer(), encoder.getSize() );
 
 	tree.findChild( 3 );
 

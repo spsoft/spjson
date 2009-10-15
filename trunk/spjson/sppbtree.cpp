@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "sppbtree.hpp"
 
@@ -21,16 +22,15 @@ typedef struct tagSP_ProtoBufTreeItem {
 } SP_ProtoBufTreeItem_t;
 
 
-SP_ProtoBufTree :: SP_ProtoBufTree( const char * buffer, int len )
+SP_ProtoBufTree :: SP_ProtoBufTree()
 {
-	mDecoder = new SP_ProtoBufDecoder( buffer, len );
-
+	mDecoder = NULL;
 	mChildren = NULL;
 }
 
 SP_ProtoBufTree :: ~SP_ProtoBufTree()
 {
-	delete mDecoder;
+	if( NULL != mDecoder ) delete mDecoder;
 	mDecoder = NULL;
 
 	if( NULL != mChildren ) {
@@ -53,6 +53,26 @@ SP_ProtoBufTree :: ~SP_ProtoBufTree()
 		delete mChildren;
 		mChildren = NULL;
 	}
+}
+
+int SP_ProtoBufTree :: attach( char * buffer, int len )
+{
+	assert( NULL == mDecoder );
+
+	mDecoder = new SP_ProtoBufDecoder();
+	mDecoder->attach( buffer, len );
+
+	return 0;
+}
+
+int SP_ProtoBufTree :: copyFrom( const char * buffer, int len )
+{
+	assert( NULL == mDecoder );
+
+	mDecoder = new SP_ProtoBufDecoder();
+	mDecoder->copyFrom( buffer, len );
+
+	return 0;
 }
 
 SP_ProtoBufDecoder * SP_ProtoBufTree :: getDecoder()
@@ -95,15 +115,16 @@ SP_ProtoBufTree * SP_ProtoBufTree :: findChild( int fieldNumber, int index )
 				item->mIsRepeated = pair.mRepeatedCount > 1;
 
 				if( 1 == pair.mRepeatedCount ) {
-					item->mTree = new SP_ProtoBufTree( pair.mBinary.mBuffer, pair.mBinary.mLen );
+					item->mTree = new SP_ProtoBufTree();
+					item->mTree->attach( pair.mBinary.mBuffer, pair.mBinary.mLen );
 				} else {
 					item->mList = new SP_JsonArrayList();
 
 					for( int i = 0; i < pair.mRepeatedCount; i++ ) {
 						mDecoder->find( fieldNumber, &pair, i );
 
-						SP_ProtoBufTree * tree = new SP_ProtoBufTree(
-								pair.mBinary.mBuffer, pair.mBinary.mLen );
+						SP_ProtoBufTree * tree = new SP_ProtoBufTree();
+						tree->attach( pair.mBinary.mBuffer, pair.mBinary.mLen );
 
 						item->mList->append( tree );
 					}

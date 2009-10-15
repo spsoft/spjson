@@ -77,7 +77,7 @@ public:
 		} m64Bit;
 
 		struct {             // wire type 2
-			const char * mBuffer;
+			char * mBuffer;
 			int mLen;
 		} mBinary;
 
@@ -90,8 +90,18 @@ public:
 
 public:
 
-	SP_ProtoBufDecoder( const char * buffer, int len );
+	SP_ProtoBufDecoder();
 	~SP_ProtoBufDecoder();
+
+	/**
+	 * @brief attach the buffer to the decoder
+	 * 
+	 * @note  1. The buffer will been modified by the decoder
+	 *        2. It is the caller's responsibility to free the buffer
+	 */
+	int attach( char * buffer, int len );
+
+	int copyFrom( const char * buffer, int len );
 
 	bool getNext( KeyValPair_t * pair );
 
@@ -104,10 +114,11 @@ private:
 	void initFieldList();
 
 	// @return > 0 : parse ok, consume how many bytes, -1 : unknown type
-	static int getPair( const char * buffer, int fieldNumber,
+	static int getPair( char * buffer, int fieldNumber,
 			int wireType, KeyValPair_t * pair );
 
 private:
+	int mNeedToFree;
 	char * mBuffer, * mEnd;
 	int mFieldIndex, mRepeatedIndex;
 
