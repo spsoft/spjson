@@ -64,7 +64,8 @@ public:
 		eVersion = 4,
 
 		eErrorCode = 1,
-		eErrorText = 2
+		eErrorMsg = 2,
+		eErrorData = 3
 	};
 
 public:
@@ -91,7 +92,7 @@ public:
 
 	int getErrorCode() const;
 
-	const char * getErrorText() const;
+	const char * getErrorMsg() const;
 
 	const char * getStrID() const;
 
@@ -110,6 +111,9 @@ class SP_ProtoBufRpcUtils {
 public:
 	static int initReqEncoder( SP_ProtoBufEncoder * reqEncoder,
 			const char * method, const char * id );
+
+	static int initRespEncoder( SP_ProtoBufEncoder * respEncoder,
+			SP_ProtoBufDecoder::KeyValPair_t * id, SP_ProtoBufEncoder * error );
 
 	static int initRespEncoder( SP_ProtoBufEncoder * respEncoder,
 			const char * id, SP_ProtoBufEncoder * error );

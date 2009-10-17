@@ -34,6 +34,8 @@ public:
 	const char * getBuffer();
 	int getSize();
 
+	char * takeBuffer();
+
 	void reset();
 
 private:
@@ -109,8 +111,6 @@ public:
 
 	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
-	static bool toString( KeyValPair_t * pair, char * buffer, int len );
-
 private:
 
 	void initFieldList();
@@ -149,6 +149,11 @@ public:
 	static int encode32Bit( uint32_t value, char * buffer );
 
 	static int encode64Bit( uint64_t value, char * buffer );
+
+	static bool toString( SP_ProtoBufDecoder::KeyValPair_t * pair, char * buffer, int len );
+
+	static int addField( SP_ProtoBufEncoder * encoder,
+			int fieldNumber, SP_ProtoBufDecoder::KeyValPair_t * pair );
 
 private:
 	SP_ProtoBufCodecUtils();

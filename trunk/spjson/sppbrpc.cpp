@@ -42,7 +42,7 @@ int SP_ProtoBufRpcReqObject :: attach( char * buffer, int len )
 	SP_ProtoBufDecoder::KeyValPair_t id;
 
 	if( mTree->getDecoder()->find( eID, &id ) ) {
-		SP_ProtoBufDecoder::toString( &id, mStrID, sizeof( mStrID ) );
+		SP_ProtoBufCodecUtils::toString( &id, mStrID, sizeof( mStrID ) );
 	}
 
 	return NULL == mPacketError ? 0 : -1;
@@ -68,7 +68,7 @@ int SP_ProtoBufRpcReqObject :: copyFrom( const char * buffer, int len )
 	SP_ProtoBufDecoder::KeyValPair_t id;
 
 	if( mTree->getDecoder()->find( eID, &id ) ) {
-		SP_ProtoBufDecoder::toString( &id, mStrID, sizeof( mStrID ) );
+		SP_ProtoBufCodecUtils::toString( &id, mStrID, sizeof( mStrID ) );
 	}
 
 	return NULL == mPacketError ? 0 : -1;
@@ -157,7 +157,7 @@ int SP_ProtoBufRpcRespObject :: attach( char * buffer, int len )
 	SP_ProtoBufDecoder::KeyValPair_t id;
 
 	if( mTree->getDecoder()->find( eID, &id ) ) {
-		SP_ProtoBufDecoder::toString( &id, mStrID, sizeof( mStrID ) );
+		SP_ProtoBufCodecUtils::toString( &id, mStrID, sizeof( mStrID ) );
 	}
 
 	return NULL == mPacketError ? 0 : -1;
@@ -180,7 +180,7 @@ int SP_ProtoBufRpcRespObject :: copyFrom( const char * buffer, int len )
 	SP_ProtoBufDecoder::KeyValPair_t id;
 
 	if( mTree->getDecoder()->find( eID, &id ) ) {
-		SP_ProtoBufDecoder::toString( &id, mStrID, sizeof( mStrID ) );
+		SP_ProtoBufCodecUtils::toString( &id, mStrID, sizeof( mStrID ) );
 	}
 
 	return NULL == mPacketError ? 0 : -1;
@@ -239,14 +239,14 @@ int SP_ProtoBufRpcRespObject :: getErrorCode() const
 	return 0;
 }
 
-const char * SP_ProtoBufRpcRespObject :: getErrorText() const
+const char * SP_ProtoBufRpcRespObject :: getErrorMsg() const
 {
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 
 	SP_ProtoBufTree * tree = mTree->findChild( eError );
 
 	if( NULL != tree ) {
-		if( tree->getDecoder()->find( eErrorText, &pair ) ) {
+		if( tree->getDecoder()->find( eErrorMsg, &pair ) ) {
 			return pair.mBinary.mBuffer;
 		}
 	}
@@ -271,6 +271,18 @@ int SP_ProtoBufRpcUtils :: initReqEncoder( SP_ProtoBufEncoder * reqEncoder,
 }
 
 int SP_ProtoBufRpcUtils :: initRespEncoder( SP_ProtoBufEncoder * respEncoder,
+			SP_ProtoBufDecoder::KeyValPair_t * id, SP_ProtoBufEncoder * error )
+{
+	SP_ProtoBufCodecUtils::addField( respEncoder, SP_ProtoBufRpcRespObject::eID, id );
+	if( NULL != error ) {
+		respEncoder->addBinary( SP_ProtoBufRpcRespObject::eError,
+				error->getBuffer(), error->getSize() );
+	}
+
+	return 0;
+}
+
+int SP_ProtoBufRpcUtils :: initRespEncoder( SP_ProtoBufEncoder * respEncoder,
 			const char * id, SP_ProtoBufEncoder * error )
 {
 	respEncoder->addString( SP_ProtoBufRpcRespObject::eID, id );
@@ -286,7 +298,7 @@ int SP_ProtoBufRpcUtils :: setError( SP_ProtoBufEncoder * error ,
 		int code, const char * msg )
 {
 	error->add32Bit( SP_ProtoBufRpcRespObject::eErrorCode, code );
-	error->addString( SP_ProtoBufRpcRespObject::eErrorText, msg );
+	error->addString( SP_ProtoBufRpcRespObject::eErrorMsg, msg );
 
 	return 0;
 }
