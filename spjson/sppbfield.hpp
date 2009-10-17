@@ -15,9 +15,9 @@ public:
 	} OffsetList_t;
 
 	typedef struct tagField {
-		int mFieldNumber : 28;
-		int mWireType : 3;
-		int mIsRepeated : 1;
+		unsigned int mFieldNumber : 28;
+		unsigned int mWireType : 3;
+		unsigned int mIsRepeated : 1;
 
 		union {
 			int mOffset;

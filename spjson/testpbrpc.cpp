@@ -68,7 +68,7 @@ void testResp()
 	} else {
 		printf( "id: %s\n", respObject.getStrID() );
 		printf( "error.code: %d\n", respObject.getErrorCode() );
-		printf( "error.text: %s\n", respObject.getErrorText() );
+		printf( "error.msg: %s\n", respObject.getErrorMsg() );
 	}
 }
 

@@ -17,10 +17,15 @@ void printAll( char * buffer, int len )
 	SP_ProtoBufDecoder decoder;
 	decoder.attach( buffer, len );
 
+	printAll( &decoder );
+}
+
+void printAll( SP_ProtoBufDecoder * decoder )
+{
 	SP_ProtoBufDecoder::KeyValPair_t pair;
 
 	for( ; ; ) {
-		if( ! decoder.getNext( &pair ) ) break;
+		if( ! decoder->getNext( &pair ) ) break;
 
     	printf("field number: %d, wire type %d, repeated count %d\n",
 				pair.mFieldNumber, pair.mWireType, pair.mRepeatedCount );

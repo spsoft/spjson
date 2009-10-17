@@ -235,6 +235,17 @@ int SP_ProtoBufEncoder :: getSize()
 	return mSize;
 }
 
+char * SP_ProtoBufEncoder :: takeBuffer()
+{
+	char * ret = mBuffer;
+
+	mBuffer = NULL;
+	mSize = 0;
+	mTotal = 0;
+
+	return ret;
+}
+
 //=========================================================
 
 SP_ProtoBufDecoder :: SP_ProtoBufDecoder()
@@ -346,39 +357,6 @@ int SP_ProtoBufDecoder :: getPair( char * buffer, int fieldNumber,
 	}
 
 	return 0 == ret ? ( curr - buffer ) : -1;
-}
-
-bool SP_ProtoBufDecoder :: toString( KeyValPair_t * pair, char * buffer, int len )
-{
-	bool ret = true;
-
-	switch( pair->mWireType )
-	{
-		case eWireVarint:
-			snprintf( buffer, len, "%lld", pair->mVarint.u );
-			break;
-
-		case eWire64Bit:
-			snprintf( buffer, len, "%lld", pair->m64Bit.u );
-			break;
-
-		case eWireBinary:
-			len = len > ( pair->mBinary.mLen + 1 ) ? ( pair->mBinary.mLen + 1 ) : len;
-
-			memcpy( buffer, pair->mBinary.mBuffer, len - 1 );
-			buffer[ len ] = '\0';
-			break;
-
-		case eWire32Bit:
-			snprintf( buffer, len, "%d", pair->m32Bit.u );
-			break;
-
-		default:
-			ret = false;
-			break;
-	}
-
-	return ret;
 }
 
 void SP_ProtoBufDecoder :: initFieldList()
@@ -658,5 +636,69 @@ int SP_ProtoBufCodecUtils :: encode64Bit( uint64_t value, char * buffer )
 	encode32Bit( tmp, buffer + 4 );
 
 	return 8;
+}
+
+bool SP_ProtoBufCodecUtils :: toString( SP_ProtoBufDecoder::KeyValPair_t * pair, char * buffer, int len )
+{
+	bool ret = true;
+
+	switch( pair->mWireType )
+	{
+		case SP_ProtoBufDecoder::eWireVarint:
+			snprintf( buffer, len, "%lld", pair->mVarint.u );
+			break;
+
+		case SP_ProtoBufDecoder::eWire64Bit:
+			snprintf( buffer, len, "%lld", pair->m64Bit.u );
+			break;
+
+		case SP_ProtoBufDecoder::eWireBinary:
+			len = len > ( pair->mBinary.mLen + 1 ) ? ( pair->mBinary.mLen + 1 ) : len;
+
+			memcpy( buffer, pair->mBinary.mBuffer, len - 1 );
+			buffer[ len ] = '\0';
+			break;
+
+		case SP_ProtoBufDecoder::eWire32Bit:
+			snprintf( buffer, len, "%d", pair->m32Bit.u );
+			break;
+
+		default:
+			ret = false;
+			break;
+	}
+
+	return ret;
+}
+
+int SP_ProtoBufCodecUtils :: addField( SP_ProtoBufEncoder * encoder,
+		int fieldNumber, SP_ProtoBufDecoder::KeyValPair_t * pair )
+{
+	int ret = -1;
+
+	switch( pair->mWireType )
+	{
+		case SP_ProtoBufDecoder::eWireVarint:
+			ret = encoder->addVarint( fieldNumber, pair->mVarint.u );
+			break;
+
+		case SP_ProtoBufDecoder::eWire64Bit:
+			ret = encoder->add64Bit( fieldNumber, pair->m64Bit.u );
+			break;
+
+		case SP_ProtoBufDecoder::eWireBinary:
+			ret = encoder->addBinary( fieldNumber, pair->mBinary.mBuffer, pair->mBinary.mLen );
+			break;
+
+		case SP_ProtoBufDecoder::eWire32Bit:
+			ret = encoder->add32Bit( fieldNumber, pair->m32Bit.u );
+			break;
+
+		default:
+			ret = -1;
+			break;
+	}
+
+	return ret;
 }
 
