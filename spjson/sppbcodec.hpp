@@ -109,6 +109,8 @@ public:
 
 	bool find( int fieldNumber, KeyValPair_t * pair, int index = 0 );
 
+	static bool toString( KeyValPair_t * pair, char * buffer, int len );
+
 private:
 
 	void initFieldList();

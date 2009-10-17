@@ -348,6 +348,39 @@ int SP_ProtoBufDecoder :: getPair( char * buffer, int fieldNumber,
 	return 0 == ret ? ( curr - buffer ) : -1;
 }
 
+bool SP_ProtoBufDecoder :: toString( KeyValPair_t * pair, char * buffer, int len )
+{
+	bool ret = true;
+
+	switch( pair->mWireType )
+	{
+		case eWireVarint:
+			snprintf( buffer, len, "%lld", pair->mVarint.u );
+			break;
+
+		case eWire64Bit:
+			snprintf( buffer, len, "%lld", pair->m64Bit.u );
+			break;
+
+		case eWireBinary:
+			len = len > ( pair->mBinary.mLen + 1 ) ? ( pair->mBinary.mLen + 1 ) : len;
+
+			memcpy( buffer, pair->mBinary.mBuffer, len - 1 );
+			buffer[ len ] = '\0';
+			break;
+
+		case eWire32Bit:
+			snprintf( buffer, len, "%d", pair->m32Bit.u );
+			break;
+
+		default:
+			ret = false;
+			break;
+	}
+
+	return ret;
+}
+
 void SP_ProtoBufDecoder :: initFieldList()
 {
 	if( NULL == mFieldList ) {

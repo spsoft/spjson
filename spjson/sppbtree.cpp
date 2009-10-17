@@ -112,6 +112,7 @@ SP_ProtoBufTree * SP_ProtoBufTree :: findChild( int fieldNumber, int index )
 				SP_ProtoBufTreeItem_t * item = (SP_ProtoBufTreeItem_t*)
 						calloc( sizeof( SP_ProtoBufTreeItem_t ), 1 );
 
+				item->mFieldNumber = fieldNumber;
 				item->mIsRepeated = pair.mRepeatedCount > 1;
 
 				if( 1 == pair.mRepeatedCount ) {
