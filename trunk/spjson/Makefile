@@ -15,11 +15,12 @@ RM = /bin/rm -f
 
 LIBOBJS = spjsonutils.o spjsoncodec.o spjsonevent.o spjsonreader.o \
 		spjsonparser.o spjsonnode.o spjsoniterator.o spjsondomparser.o \
-		spjsonhandle.o spjsonrpc.o sppbfield.o sppbcodec.o sppbtree.o
+		spjsonhandle.o spjsonrpc.o sppbfield.o sppbcodec.o sppbtree.o \
+		sppbrpc.o
 
 TARGET =  libspjson.so libspjson.a \
 		testpull testdom testhandle testrpc \
-		testprotobuf testpbtree
+		testprotobuf testpbtree testpbrpc
 
 #--------------------------------------------------------------------
 
@@ -43,11 +44,14 @@ testhandle: testhandle.o
 testrpc: testrpc.o
 	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
 
-testprotobuf: testprotobuf.o
+testprotobuf: testprotobuf.o testpbcomm.o
 	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
 
 testpbtree: testpbtree.o
 	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -o $@
+
+testpbrpc: testpbrpc.o testpbcomm.o
+	$(LINKER) $(LDFLAGS) $^ -L. -lspjson -lstdc++ -o $@
 
 clean:
 	@( $(RM) *.o vgcore.* core core.* $(TARGET) )
