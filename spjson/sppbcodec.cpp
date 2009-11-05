@@ -341,7 +341,7 @@ int SP_ProtoBufDecoder :: getPair( char * buffer, int fieldNumber,
 			pos = SP_ProtoBufCodecUtils::decodeVarint( &tmpVal, curr );
 			curr += pos;
 
-			pair->mBinary.mLen = tmpVal;
+			pair->mBinary.mLen = (int)tmpVal;
 			pair->mBinary.mBuffer = curr ;
 			curr += tmpVal;
 			break;
@@ -374,8 +374,8 @@ void SP_ProtoBufDecoder :: initFieldList()
 
 			int ret = SP_ProtoBufCodecUtils::decodeVarint( &tmpVal, curr );
 
-			int fieldNumber = tmpVal >> 3;
-			int wireType = tmpVal & 0x7;
+			int fieldNumber = (int)(tmpVal >> 3);
+			int wireType = (int)(tmpVal & 0x7);
 
 			// always overwrite the leading fieldnumber element
 			*curr = '\0';
@@ -493,7 +493,7 @@ int SP_ProtoBufCodecUtils :: getPacked( const char * buffer, int len, uint16_t *
 		int ret = decodeVarint( &tmp, pos );
 		pos += ret;
 
-		array[i] = tmp;
+		array[i] = (uint16_t)tmp;
 
 		count++;
 	}
@@ -513,7 +513,7 @@ int SP_ProtoBufCodecUtils :: getPacked( const char * buffer, int len, uint32_t *
 		int ret = decodeVarint( &tmp, pos );
 		pos += ret;
 
-		array[i] = tmp;
+		array[i] = (uint32_t)tmp;
 
 		count++;
 	}
@@ -553,7 +553,7 @@ int SP_ProtoBufCodecUtils :: getPacked( const char * buffer, int len, float * ar
 		int ret = decodeVarint( &tmp, pos );
 		pos += ret;
 
-		uint32_t tmp32 = tmp;
+		uint32_t tmp32 = (uint32_t)tmp;
 		memcpy( array + i, &tmp32, sizeof( tmp32 ) );
 
 		count++;
@@ -608,10 +608,10 @@ int SP_ProtoBufCodecUtils :: encodeVarint( uint64_t value, char *buffer )
 {
 	int pos = 0;
 	while (value >= 128) {
-		buffer[pos++] = 128 + (value & 127);
+		buffer[pos++] = (char)( 128 + (value & 127) );
 		value >>= 7;
 	}
-	buffer[pos++] = value;
+	buffer[pos++] = (char)value;
 	return pos;
 }
 
