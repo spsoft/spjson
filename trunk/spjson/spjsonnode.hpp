@@ -6,6 +6,8 @@
 #ifndef __spjsonnode_hpp__
 #define __spjsonnode_hpp__
 
+#include "spjsonport.hpp"
+
 class SP_JsonArrayList;
 
 class SP_JsonNode {
@@ -50,13 +52,13 @@ private:
 
 class SP_JsonIntNode : public SP_JsonNode {
 public:
-	SP_JsonIntNode( long long value );
+	SP_JsonIntNode( int64_t value );
 	virtual ~SP_JsonIntNode();
 
-	long long getValue() const;
+	int64_t getValue() const;
 
 private:
-	long long mValue;
+	int64_t mValue;
 };
 
 class SP_JsonNullNode : public SP_JsonNode {

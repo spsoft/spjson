@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
 

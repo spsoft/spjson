@@ -6,7 +6,7 @@
 #ifndef __spprotobuf_hpp__
 #define __spprotobuf_hpp__
 
-#include <stdint.h>
+#include "spjsonport.hpp"
 
 class SP_ProtoBufEncoder
 {

@@ -35,11 +35,13 @@ void printPair( SP_ProtoBufDecoder::KeyValPair_t * pair )
 
 void testTree()
 {
+	int i = 0;
+
 	SP_ProtoBufEncoder encoder;
 
 	encoder.addVarint( 1, 16 );
 
-	for( int i = 0; i < 3; i++ ) {
+	for( i = 0; i < 3; i++ ) {
 		SP_ProtoBufEncoder tmp;
 
 		tmp.addVarint( 1, i );
@@ -77,7 +79,7 @@ void testTree()
 	tree.getDecoder()->find( 5, &pair );
 	printPair( &pair );
 
-	for( int i = 0; i < pair.mRepeatedCount; i++ ) {
+	for( i = 0; i < pair.mRepeatedCount; i++ ) {
 		SP_ProtoBufTree * item = tree.findChild( 5, i );
 
 		SP_ProtoBufDecoder::KeyValPair_t tmp;

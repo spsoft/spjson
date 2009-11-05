@@ -11,7 +11,7 @@ class SP_ProtoBufFieldList
 public:
 	typedef struct tagOffsetList {
 		int mCount, mTotal;
-		int mList[0];
+		int mList[1];
 	} OffsetList_t;
 
 	typedef struct tagField {
