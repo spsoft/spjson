@@ -170,31 +170,40 @@ void * SP_JsonQueue :: top()
 
 SP_JsonStringBuffer :: SP_JsonStringBuffer()
 {
-	init();
-}
-
-void SP_JsonStringBuffer :: init()
-{
 	mSize = 0;
-	mMaxSize = 8;
-	mBuffer = (char*)malloc( mMaxSize );
-	memset( mBuffer, 0, mMaxSize );
+	mMaxSize = 0;
+	mBuffer = NULL;
 }
 
 SP_JsonStringBuffer :: ~SP_JsonStringBuffer()
 {
-	free( mBuffer );
+	if( NULL != mBuffer ) free( mBuffer );
+}
+
+void SP_JsonStringBuffer :: ensureSpace( int space )
+{
+	space = space > 0 ? space : 1;
+
+	if( mSize + space > mMaxSize ) {
+		if( NULL == mBuffer ) {
+			mMaxSize = ( ( space + 7 ) / 8 ) * 8;
+			mSize = 0;
+			mBuffer = (char*)malloc( mMaxSize + 1 );
+		} else {
+			mMaxSize = ( mMaxSize * 3 ) / 2 + 1;
+			if( mMaxSize < mSize + space ) mMaxSize = mSize + space;
+			mBuffer = (char*)realloc( mBuffer, mMaxSize + 1 );
+		}
+	}
+
+	assert( NULL != mBuffer );
 }
 
 int SP_JsonStringBuffer :: append( char c )
 {
-	if( mSize >= ( mMaxSize - 1 ) ) {
-		mMaxSize += ( mMaxSize * 3 ) / 2 + 1;
-		mBuffer = (char*)realloc( mBuffer, mMaxSize );
-		assert( NULL != mBuffer );
-		memset( mBuffer + mSize, 0, mMaxSize - mSize );
-	}
+	ensureSpace( 1 );
 	mBuffer[ mSize++ ] = c;
+	mBuffer[ mSize ] = '\0';
 
 	return 0;
 }
@@ -206,15 +215,10 @@ int SP_JsonStringBuffer :: append( const char * value, int size )
 	size = ( size <= 0 ? strlen( value ) : size );
 	if( size <= 0 ) return -1;
 
-	if( ( size + mSize ) > ( mMaxSize - 1 ) ) {
-		mMaxSize += size;
-		mBuffer = (char*)realloc( mBuffer, mMaxSize );
-		assert( NULL != mBuffer );
-		memset( mBuffer + mSize, 0, mMaxSize - mSize );
-	}
-
+	ensureSpace( size );
 	memcpy( mBuffer + mSize, value, size );
 	mSize += size;
+	mBuffer[ mSize ] = '\0';
 
 	return 0;
 }
@@ -226,17 +230,28 @@ int SP_JsonStringBuffer :: getSize() const
 
 const char * SP_JsonStringBuffer :: getBuffer() const
 {
-	return mBuffer;
+	return mBuffer ? mBuffer : "";
 }
 
-char * SP_JsonStringBuffer :: takeBuffer()
+char * SP_JsonStringBuffer :: detach( int * size )
 {
 	char * ret = mBuffer;
+	*size = mSize;
 
 	mBuffer = NULL;
-	init();
+	mSize = 0;
+	mMaxSize = 0;
 
 	return ret;
+}
+
+void SP_JsonStringBuffer :: attach( char * buffer, int size )
+{
+	if( NULL != mBuffer ) free( mBuffer );
+
+	mBuffer = buffer;
+	mSize = size;
+	mMaxSize = size;
 }
 
 void SP_JsonStringBuffer :: clean()
@@ -244,4 +259,5 @@ void SP_JsonStringBuffer :: clean()
 	memset( mBuffer, 0, mMaxSize );
 	mSize = 0;
 }
+
 
