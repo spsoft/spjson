@@ -57,14 +57,17 @@ public:
 	int append( const char * value, int size = 0 );
 	int getSize() const;
 	const char * getBuffer() const;
-	char * takeBuffer();
 	void clean();
+
+	char * detach( int * size );
+	void attach( char * buffer, int size );
 
 private:
 	SP_JsonStringBuffer( SP_JsonStringBuffer & );
 	SP_JsonStringBuffer & operator=( SP_JsonStringBuffer & );
 
 	void init();
+	void ensureSpace( int space );
 
 	char * mBuffer;
 	int mMaxSize;
