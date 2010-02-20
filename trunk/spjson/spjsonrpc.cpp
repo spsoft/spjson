@@ -141,6 +141,24 @@ SP_JsonObjectNode * SP_JsonRpcRespObject :: getError() const
 	return mError;
 }
 
+int SP_JsonRpcRespObject :: getErrorCode() const
+{
+	SP_JsonHandle handle( mError );
+
+	SP_JsonIntNode * node = handle.getChild( "code" ).toInt();
+
+	return NULL != node ? node->getValue() : 0;
+}
+
+const char * SP_JsonRpcRespObject :: getErrorMsg() const
+{
+	SP_JsonHandle handle( mError );
+
+	SP_JsonStringNode * node = handle.getChild( "message" ).toString();
+
+	return NULL != node ? node->getValue() : NULL;
+}
+
 const char * SP_JsonRpcRespObject :: getPacketError() const
 {
 	return mParser->getError() ? mParser->getError() : mPacketError;
