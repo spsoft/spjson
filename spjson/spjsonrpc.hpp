@@ -54,6 +54,10 @@ public:
 
 	SP_JsonObjectNode * getError() const;
 
+	int getErrorCode() const;
+
+	const char * getErrorMsg() const;
+
 	const char * getPacketError() const;
 
 private:
